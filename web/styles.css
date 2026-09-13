@@ -1,0 +1,514 @@
+/* Student OS — hand-rolled CSS custom properties + vanilla layout.
+   Tokens and values below are copied verbatim from the design spec (§3–§12) —
+   do not substitute default framework styling anywhere a value is given. */
+
+:root {
+  --bg: #F5F4EF;
+  --surface: #FFFFFF;
+  --surface-2: #F0EDE2;
+  --ink: #1B1A17;
+  --muted: #8A8578;
+  --border: #E6E2D6;
+  --accent: #E2A63B;
+  --accent-ink: #1B1A17;
+  --danger: #A34A3B;
+  --link: #3557A6;
+
+  --font-serif: 'Fraunces', serif;
+  --font-sans: 'Work Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --shadow: 0 1px 2px rgba(20, 20, 15, 0.04), 0 14px 28px -18px rgba(20, 20, 15, 0.22);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  padding-inline: 18px;
+}
+
+#app {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* --- Header (spec §10) --- */
+
+.app-header {
+  background: linear-gradient(160deg, #1B1A17, #262420);
+  border-radius: 0 0 20px 20px;
+  padding: 28px 20px 22px;
+}
+
+.header-inner .eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 8px;
+}
+
+.app-title {
+  font-family: var(--font-serif);
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--surface);
+  margin: 0 0 6px;
+}
+
+.greeting {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: #C9C5B8;
+  margin: 0;
+}
+
+/* --- Tab nav (spec §10) --- */
+
+.tab-nav {
+  display: flex;
+  gap: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  margin: -18px 8px 0;
+  padding: 6px;
+  position: relative;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tab-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.tab-btn {
+  flex: 1 1 auto;
+  white-space: nowrap;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 9px 14px;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: none;
+}
+
+.tab-btn:active {
+  transform: scale(0.97);
+}
+
+.tab-btn.is-active {
+  background: var(--ink);
+  color: var(--surface);
+}
+
+/* --- Main content + entrance animation (spec §9) --- */
+
+.main-content {
+  padding-top: 22px;
+  padding-bottom: 40px;
+}
+
+@keyframes fade-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.main-content.fade-in {
+  animation: fade-rise-in 0.28s ease;
+}
+
+/* --- Section titles + muted notes (spec §6, §12) --- */
+
+.section-title {
+  font-family: var(--font-serif);
+  font-size: 19px;
+  font-weight: 600;
+  margin: 26px 0 12px;
+}
+
+.tab-section:first-child .section-title {
+  margin-top: 0;
+}
+
+.muted-note {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--muted);
+  margin: 0 0 12px;
+  line-height: 1.5;
+}
+
+/* --- Dot + subject pill (spec §4, §8, §12) --- */
+
+.dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex: 0 0 auto;
+}
+
+.slot-dot {
+  background: #1E7F86;
+}
+
+/* --- Item card (spec §7, §11, §12) --- */
+
+.item-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 14px;
+  margin-bottom: 16px;
+}
+
+.item-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.item-card-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.item-card-title {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item-card-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
+.item-card-meta {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.progress-track {
+  height: 5px;
+  background: #EEEBE2;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 3px;
+}
+
+/* --- Topic / task rows (spec §6, §11, §12) --- */
+
+.topic-list {
+  margin-top: 8px;
+}
+
+.item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 0 8px;
+  border-top: 1px solid var(--border);
+}
+
+.item-row-name {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 400;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item-row.is-done .item-row-name {
+  text-decoration: line-through;
+  color: var(--muted);
+}
+
+/* --- Re-estimate stepper (spec §9, §12, §13, §14) --- */
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 2px;
+  flex: 0 0 auto;
+}
+
+.stepper.is-disabled {
+  opacity: 0.5;
+}
+
+.stepper-btn {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  min-height: 20px;
+  border: none;
+  background: transparent;
+  border-radius: 5px;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stepper-btn:hover:not(:disabled) {
+  background: var(--surface-2);
+}
+
+.stepper-btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.stepper-btn:disabled {
+  cursor: default;
+}
+
+.stepper-value {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  min-width: 34px;
+  text-align: center;
+}
+
+/* --- Buttons (spec §12) --- */
+
+.btn-dark,
+.mini-btn,
+.btn-del {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-dark {
+  background: var(--ink);
+  color: var(--surface);
+  border: none;
+  font-size: 13px;
+  padding: 10px 16px;
+  border-radius: 8px;
+}
+
+.btn-dark:active {
+  transform: scale(0.97);
+}
+
+.mini-btn {
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--border);
+  font-size: 11px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  flex: 0 0 auto;
+}
+
+.mini-btn:hover {
+  background: var(--surface-2);
+}
+
+.mini-btn:active {
+  transform: scale(0.97);
+}
+
+.btn-del {
+  background: transparent;
+  border: none;
+  color: var(--danger);
+  font-size: 17px;
+  line-height: 1;
+  padding: 0 2px;
+}
+
+.btn-del:active {
+  transform: scale(0.97);
+}
+
+/* --- Add-forms + inputs + error text (spec §6, §11, §12, §14) --- */
+
+.add-form {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.add-form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.add-form-row > .btn-dark {
+  margin-left: auto;
+}
+
+.input {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 7px;
+  padding: 8px 10px;
+  min-width: 0;
+}
+
+.input-subject {
+  flex: 1 1 100px;
+}
+
+.input-wide {
+  flex: 2 1 180px;
+}
+
+.input-date {
+  flex: 1 1 140px;
+}
+
+.input-minutes {
+  width: 64px;
+  flex: 0 0 auto;
+}
+
+.error-text {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: var(--danger);
+  margin: 10px 0 0;
+}
+
+/* --- Availability tab (spec §11, §12) --- */
+
+.avail-rows {
+  margin-top: 16px;
+}
+
+.avail-row {
+  padding: 8px 0;
+  border-top: 1px solid var(--border);
+}
+
+.avail-row-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.avail-weekday {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  flex: 0 0 52px;
+}
+
+.avail-window-label {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.avail-free {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.slot-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+  padding-left: 62px;
+}
+
+.slot-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface-2);
+  border-radius: 7px;
+  padding: 5px 8px;
+}
+
+.slot-chip-label {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.slot-chip-time {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* --- Responsive (spec §13) --- */
+
+@media (max-width: 420px) {
+  .slot-chip-row {
+    padding-left: 0;
+  }
+}

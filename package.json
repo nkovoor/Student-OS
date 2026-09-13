@@ -5,6 +5,7 @@
   "type": "module",
   "description": "Student OS — adaptive academic planner",
   "scripts": {
-    "test:engine": "node engine/test/test-harness.js"
+    "test:engine": "node engine/test/test-harness.js",
+    "dev": "node scripts/dev-server.js"
   }
 }
