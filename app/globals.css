@@ -294,7 +294,7 @@ select {
 .section-title {
   font-family: var(--font-serif);
   font-size: 19px;
-  font-weight: 600;
+  font-weight: 700;
   margin: 26px 0 12px;
 }
 
@@ -357,7 +357,7 @@ select {
 .item-card-title {
   font-family: var(--font-serif);
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -377,9 +377,13 @@ select {
   white-space: nowrap;
 }
 
+/* Was a hardcoded v1.1 cream hex — didn't respond to theme at all, so in
+   dark mode this track stayed a light cream color while its fill sat on
+   top of it. Spec §2.1 explicitly names --surface-2 as the token for
+   "track fills (progress bars, XP bar track)". */
 .progress-track {
   height: 5px;
-  background: #EEEBE2;
+  background: var(--surface-2);
   border-radius: 3px;
   overflow: hidden;
 }
@@ -980,7 +984,14 @@ select {
 
 .day-card.is-today {
   border-color: var(--accent);
-  box-shadow: var(--shadow), inset 0 0 0 1px rgba(226, 166, 59, 0.35);
+  /* rgba(255, 122, 26) is --accent's orange, not a token reference — CSS
+     can't pull RGB channels out of a hex custom property for use inside
+     rgba(), so the value is spelled out directly (matches how the CTA
+     button's own shadows in :root already do this). This was left over as
+     the OLD v1.1 gold accent's rgb() triplet, invisible as an actual color
+     bug because inset 0.35-alpha rings are subtle at this size — but it was
+     the wrong hue, not just an approximation. */
+  box-shadow: var(--shadow), inset 0 0 0 1px rgba(255, 122, 26, 0.35);
 }
 
 .day-card-header {
@@ -993,7 +1004,7 @@ select {
 .day-card-name {
   font-family: var(--font-serif);
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .day-card-meta {
