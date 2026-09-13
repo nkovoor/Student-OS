@@ -22,6 +22,9 @@ import {
   createTask,
   createBookedSlot,
   withComplete,
+  withPartial,
+  withSkippedToday,
+  withResetSkip,
   withEstimate,
   generatePlan,
 } from '@/lib/engine';
@@ -51,6 +54,9 @@ type Action =
   | { type: 'ADD_TASK'; subject: string; title: string; dueDate: string; estimatedMinutes: number }
   | { type: 'DELETE_TASK'; taskId: string }
   | { type: 'COMPLETE_ITEM'; item: WorkItem }
+  | { type: 'PARTIAL_ITEM'; item: WorkItem; minutesJustDone: number }
+  | { type: 'SKIP_ITEM_TODAY'; item: WorkItem }
+  | { type: 'RESET_TODAYS_SKIPS' }
   | { type: 'ADJUST_ESTIMATE'; item: WorkItem; deltaMinutes: number }
   | { type: 'SET_DAILY_MINUTES'; weekday: Weekday; minutes: number }
   | { type: 'ADD_SLOT'; weekday: Weekday; label: string; startTime: string; endTime: string }
@@ -99,6 +105,35 @@ function applyAction(data: StudentOSData, action: Action): StudentOSData {
       const tasks = item.type === 'task' ? replaceTaskInList(data.tasks, item.id, item) : data.tasks;
       const completionLog = logEntry ? [...data.completionLog, logEntry] : data.completionLog;
       return { ...data, exams, tasks, completionLog };
+    }
+
+    case 'PARTIAL_ITEM': {
+      const dateISO = todayISO();
+      const { item, logEntry } = withPartial(action.item, action.minutesJustDone, dateISO);
+      const exams = item.type === 'topic' ? replaceTopicInExams(data.exams, item.id, item) : data.exams;
+      const tasks = item.type === 'task' ? replaceTaskInList(data.tasks, item.id, item) : data.tasks;
+      const completionLog = logEntry ? [...data.completionLog, logEntry] : data.completionLog;
+      return { ...data, exams, tasks, completionLog };
+    }
+
+    case 'SKIP_ITEM_TODAY': {
+      const item = withSkippedToday(action.item, todayISO());
+      const exams = item.type === 'topic' ? replaceTopicInExams(data.exams, item.id, item) : data.exams;
+      const tasks = item.type === 'task' ? replaceTaskInList(data.tasks, item.id, item) : data.tasks;
+      return { ...data, exams, tasks };
+    }
+
+    // Clears today's skip flag from every topic/task at once — backs the
+    // single "reset today's skips" text button on Home (spec §11), not a
+    // per-item action.
+    case 'RESET_TODAYS_SKIPS': {
+      const dateISO = todayISO();
+      const exams = data.exams.map((exam) => ({
+        ...exam,
+        topics: exam.topics.map((topic) => withResetSkip(topic, dateISO)),
+      }));
+      const tasks = data.tasks.map((task) => withResetSkip(task, dateISO));
+      return { ...data, exams, tasks };
     }
 
     case 'ADJUST_ESTIMATE': {
@@ -200,6 +235,9 @@ export function useStudentOSActions() {
         dispatch({ type: 'ADD_TASK', ...input }),
       deleteTask: (taskId: string) => dispatch({ type: 'DELETE_TASK', taskId }),
       completeItem: (item: WorkItem) => dispatch({ type: 'COMPLETE_ITEM', item }),
+      partialItem: (item: WorkItem, minutesJustDone: number) => dispatch({ type: 'PARTIAL_ITEM', item, minutesJustDone }),
+      skipItemToday: (item: WorkItem) => dispatch({ type: 'SKIP_ITEM_TODAY', item }),
+      resetTodaysSkips: () => dispatch({ type: 'RESET_TODAYS_SKIPS' }),
       adjustEstimate: (item: WorkItem, deltaMinutes: number) => dispatch({ type: 'ADJUST_ESTIMATE', item, deltaMinutes }),
       setDailyMinutes: (weekday: Weekday, minutes: number) => dispatch({ type: 'SET_DAILY_MINUTES', weekday, minutes }),
       addSlot: (input: { weekday: Weekday; label: string; startTime: string; endTime: string }) =>
