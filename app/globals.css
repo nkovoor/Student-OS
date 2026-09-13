@@ -40,6 +40,13 @@
      elements legible sitting on light theme's solid blue/indigo header
      gradient — a plain var(--blue-2) streak color, for instance, would be
      low-contrast text-on-similar-hue against that same gradient. */
+  /* Page-level background wash: a soft, fixed-size fade from the header's
+     colors into the page, applied to body (see the html/body rule below) so
+     it naturally covers the full document height on every tab — a tall
+     Activities page and a short Availability page both just show flat --bg
+     once they scroll past this fade, rather than the gradient stretching or
+     compressing to fit each page's length. */
+  --page-bg: linear-gradient(180deg, rgba(46, 82, 214, 0.1) 0%, rgba(91, 61, 191, 0.05) 220px, transparent 520px), var(--bg);
   --header-bg: linear-gradient(145deg, var(--blue), var(--indigo));
   --header-radius: 26px;
   --header-border-bottom: none;
@@ -85,6 +92,13 @@
   --accent: #FF7A1A;
   --accent-2: #FFA55C;
 
+  /* Fixed pixel radii (not percentages, unlike --header-bg below) so the
+     glow's visible size stays constant regardless of how tall a given
+     page's content makes body — same reasoning as light theme's --page-bg. */
+  --page-bg:
+    radial-gradient(circle 500px at 15% 0%, rgba(76, 110, 245, 0.16), transparent),
+    radial-gradient(circle 480px at 90% 40px, rgba(255, 122, 26, 0.1), transparent),
+    var(--bg);
   --header-bg:
     radial-gradient(circle at 15% -10%, rgba(76, 110, 245, 0.3), transparent 55%),
     radial-gradient(circle at 90% 20%, rgba(255, 122, 26, 0.16), transparent 50%),
@@ -121,9 +135,28 @@
 html,
 body {
   margin: 0;
-  background: var(--bg);
   color: var(--ink);
   font-family: var(--font-sans);
+}
+
+/* Plain flat fallback so a page shorter than the viewport doesn't reveal
+   browser-default white beneath body's own (shorter) box — body's fancier
+   background below fades to this exact same color at its own trailing
+   edge anyway, so the seam is invisible. */
+html {
+  background: var(--bg);
+}
+
+/* The page-level background wash (spec's gradient/glow treatment,
+   extended beyond the header) lives here so every page gets it from the
+   same shared rule — no per-tab wiring needed. background-repeat: no-repeat
+   keeps each gradient layer painted once at the top rather than tiling
+   down the page if body ever ends up shorter than the gradient's own
+   implicit box. */
+body {
+  background: var(--page-bg);
+  background-repeat: no-repeat;
+  padding-inline: 18px;
 }
 
 body {
