@@ -63,7 +63,9 @@ select {
   padding: 28px 20px 22px;
 }
 
-.header-inner .eyebrow {
+/* Eyebrow micro-label (spec §5): reused standalone on the Home hero card
+   ("NEXT UP"), not just inside the header. */
+.eyebrow {
   font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 500;
@@ -72,6 +74,10 @@ select {
   color: var(--accent);
   margin: 0 0 8px;
   min-height: 14px;
+}
+
+.header-inner .eyebrow {
+  color: var(--accent);
 }
 
 .app-title {
@@ -338,6 +344,9 @@ select {
 /* --- Buttons (spec §12) --- */
 
 .btn-dark,
+.btn-gold,
+.btn-ghost,
+.btn-ghost-muted,
 .mini-btn,
 .btn-del {
   font-family: var(--font-sans);
@@ -345,17 +354,49 @@ select {
   cursor: pointer;
 }
 
-.btn-dark {
-  background: var(--ink);
-  color: var(--surface);
-  border: none;
+.btn-dark,
+.btn-gold,
+.btn-ghost,
+.btn-ghost-muted {
   font-size: 13px;
   padding: 10px 16px;
   border-radius: 8px;
 }
 
-.btn-dark:active {
+.btn-dark:active,
+.btn-gold:active,
+.btn-ghost:active,
+.btn-ghost-muted:active {
   transform: scale(0.97);
+}
+
+/* Primary action on the dark hero card (spec §12: "btn-gold ... primary,
+   dark surfaces") — "Mark complete". */
+.btn-gold {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border: none;
+}
+
+/* Secondary actions, hero card only — "Did some of it" / "Skip for now".
+   btn-ghost is the more visible of the two, btn-ghost-muted the least
+   emphasized (reuses the header's dark-surface-only muted grey token). */
+.btn-ghost {
+  background: transparent;
+  color: var(--surface);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.btn-ghost-muted {
+  background: transparent;
+  color: #C9C5B8;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.btn-dark {
+  background: var(--ink);
+  color: var(--surface);
+  border: none;
 }
 
 .mini-btn {
@@ -509,6 +550,318 @@ select {
   font-family: var(--font-mono);
   font-size: 11px;
   color: var(--muted);
+}
+
+/* --- Generic "default" card (spec §7, §12): Then-today, Next-7-days,
+   completion, and stat cards on Home — 14px radius, 18px padding, distinct
+   from the more compact .item-card/.day-card (12px radius, 14px padding). */
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  padding: 18px;
+  margin-bottom: 16px;
+}
+
+.card-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.card-title {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.reset-skips-btn {
+  display: inline-flex;
+  margin-bottom: 10px;
+}
+
+/* --- Capacity read (spec §11, §12): ahead/on-track in --muted, behind in
+   --danger — text only, never a filled badge. Shared by Home and (later)
+   Progress. --- */
+
+.capacity-read {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.capacity-read.is-behind {
+  color: var(--danger);
+}
+
+.capacity-read.is-ahead,
+.capacity-read.is-on-track {
+  color: var(--muted);
+}
+
+/* --- Reason text (spec §2, §12, §18): sits directly under a row that moved
+   since the last render, never its own bordered row. --- */
+
+.reason-text {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+  margin: 2px 0 0;
+}
+
+/* --- Next-up hero card (spec §4, §6, §7, §11): the one inverted-dark card
+   in the app. --- */
+
+.next-card {
+  background: var(--ink);
+  border: 1px solid var(--accent);
+  box-shadow: var(--shadow), inset 0 0 0 1px rgba(226, 166, 59, 0.25);
+  border-radius: 14px;
+  padding: 22px;
+  margin-bottom: 16px;
+}
+
+.subject-pill {
+  display: inline-block;
+  color: var(--surface);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+  margin-bottom: 10px;
+}
+
+.next-card-label {
+  font-family: var(--font-serif);
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1.32;
+  color: var(--surface);
+  margin: 0 0 8px;
+}
+
+.next-card-minutes {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: #C9C5B8;
+  margin: 0;
+}
+
+.next-card .reason-text {
+  color: #C9C5B8;
+}
+
+.next-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.next-card-empty {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: #C9C5B8;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Inline "did some of it" minutes entry — replaces the 3-button row while
+   active, no modal. */
+.partial-entry {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+
+.partial-entry-label {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: #C9C5B8;
+}
+
+/* The stepper's default colors assume a light card — on the dark hero card
+   its border and text need a dark-surface variant. */
+.next-card .stepper {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.next-card .stepper-value,
+.next-card .stepper-btn {
+  color: var(--surface);
+}
+
+.next-card .stepper-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* --- Block row (spec §11): Scheduler's day-cards and Home's "then today"
+   card — dot + label left, mono minutes right. --- */
+
+.block-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-top: 1px solid var(--border);
+}
+
+.block-row-label {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.block-row-minutes {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* --- Day strip (spec §11): Home's "Next 7 days" glance bar — plain CSS,
+   not Chart.js, per §12's note that this and Progress's trend chart are
+   deliberately two different implementations. --- */
+
+.day-strip {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 80px;
+  margin-top: 8px;
+}
+
+.day-strip-col {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+  justify-content: flex-end;
+}
+
+.day-strip-bar {
+  width: 100%;
+  max-width: 22px;
+  background: #D8D4C8;
+  border-radius: 3px 3px 0 0;
+  min-height: 3px;
+}
+
+.day-strip-bar.is-today {
+  background: var(--accent);
+}
+
+.day-strip-day-label {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* --- Doughnut + subject legend (spec §11, §12) --- */
+
+.doughnut-wrap {
+  width: 180px;
+  height: 180px;
+  margin: 0 auto 16px;
+}
+
+.subject-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.subject-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.subject-legend-name {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  flex: 1 1 auto;
+}
+
+.subject-legend-minutes {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* --- Stat card (spec §11): the simplest card in the app. --- */
+
+.stat-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.stat-row-label {
+  font-family: var(--font-sans);
+  font-size: 13px;
+}
+
+.stat-row-value {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* --- Day card (spec §7, §11): Scheduler's 7-card stack. Same compact
+   treatment as .item-card, plus the accent-ring "today" state. --- */
+
+.day-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 14px;
+  margin-bottom: 16px;
+}
+
+.day-card.is-today {
+  border-color: var(--accent);
+  box-shadow: var(--shadow), inset 0 0 0 1px rgba(226, 166, 59, 0.35);
+}
+
+.day-card-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.day-card-name {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.day-card-meta {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.day-card-body {
+  margin-top: 8px;
 }
 
 /* --- Responsive (spec §13) --- */

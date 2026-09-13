@@ -3,11 +3,13 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-// Only the two tabs built so far (spec §11 Activities + Availability). Real
+// Four of the five tabs built so far, in spec §2's order (spec §11). Real
 // Next.js routes rather than client-side tab-switching, so each is a
-// standalone page; Home/Scheduler/Progress are a one-line addition later.
+// standalone page; Progress is a one-line addition later.
 const TABS = [
+  { href: '/home', label: 'Home' },
   { href: '/activities', label: 'Activities' },
+  { href: '/scheduler', label: 'Scheduler' },
   { href: '/availability', label: 'Availability' },
 ] as const;
 
