@@ -1,25 +1,106 @@
-/* Student OS — hand-rolled CSS custom properties (no Tailwind/component kit,
-   per the build brief). Tokens and values below are copied verbatim from the
-   design spec (§3–§12) — do not substitute default framework styling
-   anywhere a value is given. */
+/* Student OS v2 — "warm indigo-blue + orange" color system (replaces v1.1's
+   single-gold "Paper & Ink" palette), with matching light and dark themes.
+   Values below are copied verbatim from the two approved mockups
+   (style 29 = light, style 30 = dark) — this file doesn't approximate them.
+   Theme switching works by re-declaring the same variable names under
+   :root[data-theme="dark"], so every component below keeps referencing
+   var(--bg)/var(--ink)/etc. with no per-component theme logic. */
 
 :root {
-  --bg: #F5F4EF;
+  /* --- Light theme (default) --- */
+  --bg: #F8F6F1;
   --surface: #FFFFFF;
-  --surface-2: #F0EDE2;
-  --ink: #1B1A17;
-  --muted: #8A8578;
-  --border: #E6E2D6;
-  --accent: #E2A63B;
-  --accent-ink: #1B1A17;
-  --danger: #A34A3B;
-  --link: #3557A6;
+  --surface-2: #EEF1FB;
+  --ink: #181D2E;
+  --muted: #7B7E93;
+  --border: #E7E9F5;
 
-  --font-serif: 'Fraunces', serif;
-  --font-sans: 'Work Sans', sans-serif;
+  --blue: #2E52D6;
+  --blue2: #5B7CFF;
+  --indigo: #5B3DBF;
+  --orange: #FF7A1A;
+  --orange2: #E0640A;
+  --ink-dark: #181D2E;
+
+  --danger: #D64545;
+  --accent: var(--orange);
+  --link: var(--blue);
+
+  /* Semantic tokens that differ in *structure* (not just color) between
+     themes, not just palette swaps — see the [data-theme="dark"] block. */
+  --header-bg: linear-gradient(145deg, var(--blue), var(--indigo));
+  --header-radius: 26px;
+  --header-border-bottom: none;
+  --header-subtitle-color: rgba(255, 255, 255, 0.85);
+  --level-badge-bg: rgba(255, 255, 255, 0.18);
+  --level-badge-border: none;
+  --level-badge-color: #FFFFFF;
+  --streak-color: #FFD9B0;
+  --xp-track-bg: rgba(255, 255, 255, 0.22);
+  --xp-fill-bg: var(--orange);
+  --xp-fill-glow: none;
+  --xp-label-color: rgba(255, 255, 255, 0.8);
+  --next-card-bg: linear-gradient(160deg, #F0F2FC, #FFFFFF);
+  --next-card-border-width: 1.5px;
+  --next-card-glow: none;
+  --hero-mins-color: var(--blue);
+  --pill-text-color: #FFFFFF;
+  --btn-gold-gradient: linear-gradient(90deg, var(--blue) 0%, var(--blue2) 45%, var(--orange) 100%);
+  --btn-gold-shadow: 0 6px 18px rgba(46, 82, 214, 0.35);
+  --stat-row-bg: linear-gradient(90deg, #F0F2FC, #FFF3E9);
+  --today-bar-bg: linear-gradient(180deg, var(--blue), var(--orange));
+  --today-bar-glow: none;
+
+  --font-serif: 'Space Grotesk', sans-serif;
+  --font-sans: 'Inter', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
-  --shadow: 0 1px 2px rgba(20, 20, 15, 0.04), 0 14px 28px -18px rgba(20, 20, 15, 0.22);
+  --shadow: 0 4px 14px rgba(46, 82, 214, 0.06);
+}
+
+:root[data-theme='dark'] {
+  --bg: #12111D;
+  --surface: #1B1A2D;
+  --surface-2: #252340;
+  --ink: #F2F1FA;
+  --muted: #8C89A8;
+  --border: #302E4C;
+
+  --blue: #4C6EF5;
+  --blue2: #7B93FF;
+  --indigo: #8B5CF6;
+  --orange: #FF7A1A;
+  --orange2: #FFA55C;
+  --ink-dark: #12111D;
+
+  --danger: #FF6B6B;
+
+  --header-bg:
+    radial-gradient(circle at 15% -10%, rgba(76, 110, 245, 0.3), transparent 55%),
+    radial-gradient(circle at 90% 20%, rgba(255, 122, 26, 0.16), transparent 50%),
+    var(--bg);
+  --header-border-bottom: none;
+  --header-subtitle-color: var(--muted);
+  --level-badge-bg: var(--surface-2);
+  --level-badge-border: 1px solid var(--orange);
+  --level-badge-color: var(--orange2);
+  --streak-color: var(--blue2);
+  --xp-track-bg: var(--surface-2);
+  --xp-fill-bg: linear-gradient(90deg, var(--blue), var(--orange));
+  --xp-fill-glow: 0 0 8px rgba(255, 122, 26, 0.4);
+  --xp-label-color: var(--muted);
+  --next-card-bg: linear-gradient(160deg, var(--surface-2), var(--surface));
+  --next-card-border-width: 1px;
+  --next-card-glow: 0 0 40px rgba(76, 110, 245, 0.2);
+  --hero-mins-color: var(--blue2);
+  --pill-text-color: #3A1800;
+  --btn-gold-gradient: linear-gradient(90deg, var(--blue) 0%, var(--blue2) 45%, var(--orange) 100%);
+  --btn-gold-shadow: 0 6px 20px rgba(76, 110, 245, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+  --stat-row-bg: linear-gradient(90deg, rgba(76, 110, 245, 0.16), rgba(255, 122, 26, 0.14));
+  --today-bar-bg: linear-gradient(180deg, var(--blue), var(--orange));
+  --today-bar-glow: 0 0 10px rgba(255, 122, 26, 0.35);
+
+  --shadow: none;
 }
 
 * {
@@ -58,42 +139,78 @@ select {
 /* --- Header (spec §10) --- */
 
 .app-header {
-  background: linear-gradient(160deg, #1B1A17, #262420);
-  border-radius: 0 0 20px 20px;
+  background: var(--header-bg);
+  border-radius: 0 0 var(--header-radius) var(--header-radius);
+  border-bottom: var(--header-border-bottom);
   padding: 28px 20px 22px;
 }
 
-/* Eyebrow micro-label (spec §5): reused standalone on the Home hero card
-   ("NEXT UP"), not just inside the header. */
+.header-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.header-top-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Eyebrow micro-label: the Home hero card's "⚡ NEXT UP · +50 XP" line. The
+   v2 header itself no longer has a date eyebrow — Part 5 of the redesign
+   prompt specifies its content exhaustively (level badge + streak, title,
+   greeting, XP bar) and a date line isn't part of that list. */
 .eyebrow {
   font-family: var(--font-mono);
   font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin: 0 0 8px;
-  min-height: 14px;
-}
-
-.header-inner .eyebrow {
-  color: var(--accent);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--orange2);
+  margin: 0 0 12px;
 }
 
 .app-title {
   font-family: var(--font-serif);
   font-size: 28px;
-  font-weight: 600;
-  color: var(--surface);
+  font-weight: 700;
+  color: #FFFFFF;
   margin: 0 0 6px;
 }
 
 .greeting {
   font-family: var(--font-sans);
   font-size: 14px;
-  color: #C9C5B8;
+  color: var(--header-subtitle-color);
   margin: 0;
   min-height: 18px;
+}
+
+/* --- Theme toggle (v2 Part 1.2) --- */
+
+.theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(255, 255, 255, 0.14);
+  color: #FFFFFF;
+  font-size: 15px;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+:root[data-theme='dark'] .theme-toggle-btn {
+  background: var(--surface-2);
+}
+
+.theme-toggle-btn:active {
+  transform: scale(0.94);
 }
 
 /* --- Tab nav (spec §10) --- */
@@ -184,11 +301,15 @@ select {
 
 /* --- Dot + subject pill (spec §4, §8, §12) --- */
 
+/* v1.1 used a square dot (border-radius: 2px) as a deliberate "not a bullet
+   point" choice; the v2 mockups use a round dot instead — a genuine style
+   change in the new visual system, not an oversight, so applied everywhere
+   dots appear rather than left inconsistent between old and new pages. */
 .dot {
   display: inline-block;
   width: 8px;
   height: 8px;
-  border-radius: 2px;
+  border-radius: 50%;
   flex: 0 0 auto;
 }
 
@@ -354,13 +475,24 @@ select {
   cursor: pointer;
 }
 
-.btn-dark,
-.btn-gold,
-.btn-ghost,
-.btn-ghost-muted {
+.btn-dark {
   font-size: 13px;
   padding: 10px 16px;
   border-radius: 8px;
+}
+
+/* The hero's three buttons get the new mockup's exact sizing (14px/13px16px/
+   11px radius) — larger and more "tappable-primary" than Activities' form
+   button, which isn't being re-skinned until the later pass over the other
+   tabs (Part 6). */
+.btn-gold,
+.btn-ghost,
+.btn-ghost-muted {
+  font-size: 14px;
+  font-weight: 700;
+  padding: 13px 16px;
+  border-radius: 11px;
+  text-align: center;
 }
 
 .btn-dark:active,
@@ -370,27 +502,27 @@ select {
   transform: scale(0.97);
 }
 
-/* Primary action on the dark hero card (spec §12: "btn-gold ... primary,
-   dark surfaces") — "Mark complete". */
+/* Primary action on the hero card — "Mark complete". The one place in the
+   app the blue-to-orange gradient treatment appears (Part 4: "use it ONLY
+   for the single highest-priority action per screen"). */
 .btn-gold {
-  background: var(--accent);
-  color: var(--accent-ink);
+  background: var(--btn-gold-gradient);
+  color: #FFFFFF;
   border: none;
+  box-shadow: var(--btn-gold-shadow);
 }
 
-/* Secondary actions, hero card only — "Did some of it" / "Skip for now".
-   btn-ghost is the more visible of the two, btn-ghost-muted the least
-   emphasized (reuses the header's dark-surface-only muted grey token). */
+/* Secondary actions, hero card only — "Did some of it" / "Skip for now". */
 .btn-ghost {
-  background: transparent;
-  color: var(--surface);
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: var(--surface-2);
+  color: var(--orange2);
+  border: 1.5px solid var(--orange);
 }
 
 .btn-ghost-muted {
   background: transparent;
-  color: #C9C5B8;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: var(--muted);
+  border: 1.5px solid var(--border);
 }
 
 .btn-dark {
@@ -576,7 +708,7 @@ select {
 .card-title {
   font-family: var(--font-serif);
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .reset-skips-btn {
@@ -618,56 +750,63 @@ select {
    in the app. --- */
 
 .next-card {
-  background: var(--ink);
-  border: 1px solid var(--accent);
-  box-shadow: var(--shadow), inset 0 0 0 1px rgba(226, 166, 59, 0.25);
+  background: var(--next-card-bg);
+  border: var(--next-card-border-width) solid var(--blue);
+  box-shadow: var(--shadow), var(--next-card-glow);
   border-radius: 14px;
   padding: 22px;
   margin-bottom: 16px;
 }
 
+/* v1.1's hero card was always a dark surface, so its text was hardcoded to
+   white/light-grey. v2's hero card is near-white in light theme and dark in
+   dark theme, so its text now uses the same tokens as the rest of the page
+   (--ink for the surrounding theme is dark-on-light or light-on-dark by
+   construction) instead of fixed colors. */
 .subject-pill {
   display: inline-block;
-  color: var(--surface);
+  background: var(--orange);
+  color: var(--pill-text-color);
   font-family: var(--font-sans);
   font-size: 12px;
-  font-weight: 600;
-  padding: 3px 10px;
-  border-radius: 999px;
+  font-weight: 700;
+  padding: 5px 14px;
+  border-radius: 8px;
   margin-bottom: 10px;
 }
 
 .next-card-label {
   font-family: var(--font-serif);
   font-size: 21px;
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.32;
-  color: var(--surface);
+  color: var(--ink);
   margin: 0 0 8px;
 }
 
 .next-card-minutes {
   font-family: var(--font-mono);
   font-size: 13px;
-  color: #C9C5B8;
+  font-weight: 700;
+  color: var(--hero-mins-color);
   margin: 0;
 }
 
 .next-card .reason-text {
-  color: #C9C5B8;
+  color: var(--muted);
 }
 
 .next-card-actions {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  flex-direction: column;
+  gap: 9px;
   margin-top: 18px;
 }
 
 .next-card-empty {
   font-family: var(--font-sans);
   font-size: 13px;
-  color: #C9C5B8;
+  color: var(--muted);
   margin: 0;
   line-height: 1.5;
 }
@@ -685,22 +824,7 @@ select {
 .partial-entry-label {
   font-family: var(--font-sans);
   font-size: 13px;
-  color: #C9C5B8;
-}
-
-/* The stepper's default colors assume a light card — on the dark hero card
-   its border and text need a dark-surface variant. */
-.next-card .stepper {
-  border-color: rgba(255, 255, 255, 0.3);
-}
-
-.next-card .stepper-value,
-.next-card .stepper-btn {
-  color: var(--surface);
-}
-
-.next-card .stepper-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.12);
+  color: var(--muted);
 }
 
 /* --- Block row (spec §11): Scheduler's day-cards and Home's "then today"
@@ -756,13 +880,14 @@ select {
 .day-strip-bar {
   width: 100%;
   max-width: 22px;
-  background: #D8D4C8;
+  background: var(--surface-2);
   border-radius: 3px 3px 0 0;
   min-height: 3px;
 }
 
 .day-strip-bar.is-today {
-  background: var(--accent);
+  background: var(--today-bar-bg);
+  box-shadow: var(--today-bar-glow);
 }
 
 .day-strip-day-label {
@@ -810,17 +935,20 @@ select {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  background: var(--stat-row-bg);
 }
 
 .stat-row-label {
   font-family: var(--font-sans);
-  font-size: 13px;
+  font-size: 13.5px;
+  font-weight: 700;
 }
 
 .stat-row-value {
   font-family: var(--font-mono);
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--orange2);
 }
 
 /* --- Day card (spec §7, §11): Scheduler's 7-card stack. Same compact
@@ -862,6 +990,59 @@ select {
 
 .day-card-body {
   margin-top: 8px;
+}
+
+/* --- Gamification (v2 Parts 3-4): level badge, streak, XP bar. Header-only
+   for this pass — Home's hero eyebrow reuses .eyebrow, already updated
+   above. --- */
+
+.level-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--level-badge-bg);
+  border: var(--level-badge-border);
+  border-radius: 8px;
+  padding: 5px 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--level-badge-color);
+}
+
+.streak-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--streak-color);
+}
+
+.xp-bar-track {
+  margin-top: 16px;
+  height: 7px;
+  background: var(--xp-track-bg);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.xp-bar-fill {
+  height: 100%;
+  background: var(--xp-fill-bg);
+  border-radius: 999px;
+  box-shadow: var(--xp-fill-glow);
+}
+
+.xp-bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--xp-label-color);
+  margin-top: 7px;
 }
 
 /* --- Responsive (spec §13) --- */

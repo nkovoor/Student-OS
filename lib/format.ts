@@ -1,17 +1,32 @@
 import { diffInDays, toISODate } from '@/lib/engine';
+import type { Theme } from '@/lib/theme';
 
-// Subject color coding (spec §4) — the only way subjects are distinguished
-// anywhere in the product.
-const SUBJECT_COLORS: Record<string, string> = {
-  Maths: '#3557A6',
-  Science: '#2F7A5E',
-  English: '#A6453B',
-  'Social Science': '#7A5EA6',
+// Subject color coding — the only way subjects are distinguished anywhere in
+// the product. v2's warm blue/orange palette needs different literal hex
+// values per theme (e.g. Science's green is brighter in dark mode for
+// contrast), not just a straight reuse of one fixed color — taken from the
+// two approved mockups.
+const SUBJECT_COLORS: Record<Theme, Record<string, string>> = {
+  light: {
+    Maths: '#2E52D6',
+    Science: '#2F9E6E',
+    English: '#FF7A1A',
+    'Social Science': '#5B3DBF',
+  },
+  dark: {
+    Maths: '#7B93FF',
+    Science: '#5FE3A0',
+    English: '#FF7A1A',
+    'Social Science': '#8B5CF6',
+  },
 };
-const SUBJECT_FALLBACK = '#6B6558';
+const SUBJECT_FALLBACK: Record<Theme, string> = {
+  light: '#7B7E93',
+  dark: '#8C89A8',
+};
 
-export function subjectColor(subject: string): string {
-  return SUBJECT_COLORS[subject] || SUBJECT_FALLBACK;
+export function subjectColor(subject: string, theme: Theme): string {
+  return SUBJECT_COLORS[theme][subject] || SUBJECT_FALLBACK[theme];
 }
 
 export function todayISO(): string {

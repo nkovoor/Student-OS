@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { usePlan, useStudentOSData, useStudentOSActions } from '@/lib/state/StudentOSProvider';
 import { findWorkItem } from '@/lib/state/findWorkItem';
-import { subjectColor } from '@/lib/format';
+import { xpForCompletion } from '@/lib/gamification';
 import { ReasonText } from '@/components/ReasonText';
 
 const PARTIAL_STEP_MINUTES = 5;
@@ -27,7 +27,7 @@ export function NextUpCard() {
   if (!block || !item) {
     return (
       <div className="next-card">
-        <p className="eyebrow">NEXT UP</p>
+        <p className="eyebrow">⚡ NEXT UP</p>
         <p className="next-card-empty">
           Nothing left scheduled for today. Check Activities to add more, or look ahead in Scheduler.
         </p>
@@ -36,6 +36,7 @@ export function NextUpCard() {
   }
 
   const remaining = item.estimatedMinutes - item.minutesDone;
+  const xpReward = xpForCompletion(remaining, item.estimatedMinutes);
 
   function startPartial() {
     setPartialMinutes(Math.min(remaining, DEFAULT_PARTIAL_MINUTES));
@@ -44,10 +45,11 @@ export function NextUpCard() {
 
   return (
     <div className="next-card">
-      <p className="eyebrow">NEXT UP</p>
-      <span className="subject-pill" style={{ background: subjectColor(block.subject) }}>
-        {block.subject}
-      </span>
+      <p className="eyebrow">⚡ NEXT UP · +{xpReward} XP</p>
+      {/* The subject pill is always orange in v2 (a fixed accent tag), not
+          subject-colored — unlike the dots elsewhere, which stay subject-
+          colored. See app/globals.css's .subject-pill rule. */}
+      <span className="subject-pill">{block.subject}</span>
       <p className="next-card-label">{block.label}</p>
       <p className="next-card-minutes">{block.minutes}m</p>
       <ReasonText reason={block.reason} />

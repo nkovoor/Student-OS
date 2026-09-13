@@ -3,15 +3,17 @@
 import type { Exam } from '@/lib/engine';
 import { useStudentOSActions } from '@/lib/state/StudentOSProvider';
 import { subjectColor, formatDueMeta } from '@/lib/format';
+import { useTheme } from '@/lib/theme';
 import { ProgressBar } from '@/components/ProgressBar';
 import { ItemRow } from './ItemRow';
 
 export function ExamCard({ exam }: { exam: Exam }) {
   const { deleteExam } = useStudentOSActions();
+  const { theme } = useTheme();
   const totalEstimate = exam.topics.reduce((sum, t) => sum + t.estimatedMinutes, 0);
   const totalDone = exam.topics.reduce((sum, t) => sum + t.minutesDone, 0);
   const progress = totalEstimate > 0 ? totalDone / totalEstimate : 0;
-  const color = subjectColor(exam.subject);
+  const color = subjectColor(exam.subject, theme);
 
   return (
     <div className="item-card">

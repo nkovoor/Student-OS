@@ -3,13 +3,15 @@
 import type { Task } from '@/lib/engine';
 import { useStudentOSActions } from '@/lib/state/StudentOSProvider';
 import { subjectColor, formatDueMeta } from '@/lib/format';
+import { useTheme } from '@/lib/theme';
 import { ProgressBar } from '@/components/ProgressBar';
 import { ItemRow } from './ItemRow';
 
 export function TaskCard({ task }: { task: Task }) {
   const { deleteTask } = useStudentOSActions();
+  const { theme } = useTheme();
   const progress = task.estimatedMinutes > 0 ? task.minutesDone / task.estimatedMinutes : 0;
-  const color = subjectColor(task.subject);
+  const color = subjectColor(task.subject, theme);
 
   return (
     <div className="item-card">

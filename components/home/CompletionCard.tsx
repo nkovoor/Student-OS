@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { Chart } from 'chart.js/auto';
 import { subjectColor } from '@/lib/format';
+import { useTheme } from '@/lib/theme';
 import { SubjectLegend } from '@/components/SubjectLegend';
 import type { LegendEntry } from '@/components/SubjectLegend';
 
@@ -10,6 +11,7 @@ import type { LegendEntry } from '@/components/SubjectLegend';
 // with the custom SubjectLegend component underneath. Chart.js is used
 // directly (no React wrapper library), per the build brief's dependency list.
 export function CompletionCard({ entries }: { entries: LegendEntry[] }) {
+  const { theme } = useTheme();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart<'doughnut', number[], string> | null>(null);
 
@@ -25,7 +27,7 @@ export function CompletionCard({ entries }: { entries: LegendEntry[] }) {
         datasets: [
           {
             data: sorted.map((entry) => entry.minutes),
-            backgroundColor: sorted.map((entry) => subjectColor(entry.subject)),
+            backgroundColor: sorted.map((entry) => subjectColor(entry.subject, theme)),
             borderWidth: 0,
           },
         ],
@@ -44,7 +46,7 @@ export function CompletionCard({ entries }: { entries: LegendEntry[] }) {
       chartRef.current?.destroy();
       chartRef.current = null;
     };
-  }, [entries]);
+  }, [entries, theme]);
 
   return (
     <div className="card">

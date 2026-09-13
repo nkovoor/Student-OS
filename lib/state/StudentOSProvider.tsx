@@ -30,6 +30,8 @@ import {
 } from '@/lib/engine';
 import type { Exam, Task, Availability, BookedSlot, CompletionLogEntry, Weekday, WorkItem, Plan } from '@/lib/engine';
 import { todayISO } from '@/lib/format';
+import { xpForCompletion } from '@/lib/gamification';
+import type { XpLogEntry } from '@/lib/gamification';
 
 export const DEFAULT_TOPIC_ESTIMATE_MINUTES = 30;
 export const ESTIMATE_STEP_MINUTES = 5;
@@ -41,6 +43,12 @@ interface StudentOSData {
   availability: Availability;
   bookedSlots: BookedSlot[];
   completionLog: CompletionLogEntry[];
+  // Gamification (v2): lives in-memory alongside everything else for now —
+  // there's no Supabase project connected yet, so there's no `profile` table
+  // to add a total_xp column to. This moves into the database the same way
+  // exams/tasks will, once that work resumes.
+  totalXp: number;
+  xpLog: XpLogEntry[];
 }
 
 interface State {
@@ -104,7 +112,10 @@ function applyAction(data: StudentOSData, action: Action): StudentOSData {
       const exams = item.type === 'topic' ? replaceTopicInExams(data.exams, item.id, item) : data.exams;
       const tasks = item.type === 'task' ? replaceTaskInList(data.tasks, item.id, item) : data.tasks;
       const completionLog = logEntry ? [...data.completionLog, logEntry] : data.completionLog;
-      return { ...data, exams, tasks, completionLog };
+      const xpAwarded = logEntry ? xpForCompletion(logEntry.minutes, item.estimatedMinutes) : 0;
+      const totalXp = data.totalXp + xpAwarded;
+      const xpLog = xpAwarded > 0 ? [...data.xpLog, { date: dateISO, xp: xpAwarded }] : data.xpLog;
+      return { ...data, exams, tasks, completionLog, totalXp, xpLog };
     }
 
     case 'PARTIAL_ITEM': {
@@ -113,7 +124,10 @@ function applyAction(data: StudentOSData, action: Action): StudentOSData {
       const exams = item.type === 'topic' ? replaceTopicInExams(data.exams, item.id, item) : data.exams;
       const tasks = item.type === 'task' ? replaceTaskInList(data.tasks, item.id, item) : data.tasks;
       const completionLog = logEntry ? [...data.completionLog, logEntry] : data.completionLog;
-      return { ...data, exams, tasks, completionLog };
+      const xpAwarded = logEntry ? xpForCompletion(logEntry.minutes, item.estimatedMinutes) : 0;
+      const totalXp = data.totalXp + xpAwarded;
+      const xpLog = xpAwarded > 0 ? [...data.xpLog, { date: dateISO, xp: xpAwarded }] : data.xpLog;
+      return { ...data, exams, tasks, completionLog, totalXp, xpLog };
     }
 
     case 'SKIP_ITEM_TODAY': {
@@ -182,6 +196,8 @@ function initState(): State {
     availability: createAvailability({}),
     bookedSlots: [],
     completionLog: [],
+    totalXp: 0,
+    xpLog: [],
   };
   const plan = generatePlan({
     exams: data.exams,

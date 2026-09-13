@@ -1,34 +1,46 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useStudentOSData } from '@/lib/state/StudentOSProvider';
+import { xpToLevel, computeStreak } from '@/lib/gamification';
+import { todayISO } from '@/lib/format';
+import { LevelBadge } from '@/components/gamification/LevelBadge';
+import { StreakIndicator } from '@/components/gamification/StreakIndicator';
+import { XPBar } from '@/components/gamification/XPBar';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
-// Date/greeting are computed client-side only (spec §10: "time-of-day-aware
-// greeting"). Filling these in from an effect rather than during the initial
-// render avoids a hydration mismatch: the server has no reliable notion of
-// the viewer's local date/time-of-day, so SSR renders empty placeholders and
-// the real text appears the moment the client mounts.
+// Greeting is computed client-side only, same reasoning as before (spec
+// §10: "time-of-day-aware greeting" — SSR has no reliable notion of the
+// viewer's local time, so this fills in from an effect after mount rather
+// than risking a hydration mismatch). The v2 header content order (level
+// badge + streak, title, greeting, XP bar) is Part 5's explicit spec — the
+// old date eyebrow isn't part of it, so it's been dropped.
 export function Header() {
-  const [dateText, setDateText] = useState('');
+  const { totalXp, completionLog } = useStudentOSData();
   const [greeting, setGreeting] = useState('');
 
   useEffect(() => {
-    const now = new Date();
-    setDateText(
-      now
-        .toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
-        .toUpperCase()
-    );
-    const hour = now.getHours();
+    const hour = new Date().getHours();
     const timeOfDay = hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening';
-    setGreeting(`Good ${timeOfDay}. Here's what's on your plate.`);
+    setGreeting(`Good ${timeOfDay}. Let's make today count.`);
   }, []);
+
+  const progress = xpToLevel(totalXp);
+  const streak = computeStreak(completionLog, todayISO());
 
   return (
     <header className="app-header">
       <div className="header-inner">
-        <p className="eyebrow">{dateText}</p>
+        <div className="header-top-row">
+          <LevelBadge level={progress.level} />
+          <div className="header-top-right">
+            <StreakIndicator streak={streak} />
+            <ThemeToggle />
+          </div>
+        </div>
         <h1 className="app-title">Student OS</h1>
         <p className="greeting">{greeting}</p>
+        <XPBar progress={progress} />
       </div>
     </header>
   );
