@@ -1,12 +1,21 @@
-import { createExam, createTopic, createTask, createAvailability, createBookedSlot } from '../model.js';
-import { addDays } from '../dateUtils.js';
+import { createExam, createTopic, createTask, createAvailability, createBookedSlot } from '../model';
+import type { Exam, Task, Availability, BookedSlot, CompletionLogEntry } from '../model';
+import { addDays } from '../dateUtils';
+
+export interface SampleData {
+  exams: Exam[];
+  tasks: Task[];
+  availability: Availability;
+  bookedSlots: BookedSlot[];
+  completionLog: CompletionLogEntry[];
+}
 
 /**
  * Builds a fresh sample dataset anchored on `today`. Returns plain, mutable
- * objects so the test harness can apply mark* actions between renders.
+ * objects so the test harness can apply action helpers between renders.
  */
-export function buildSampleData(today) {
-  const exams = [
+export function buildSampleData(today: string): SampleData {
+  const exams: Exam[] = [
     createExam({
       id: 'exam_math',
       subject: 'Maths',
@@ -28,7 +37,7 @@ export function buildSampleData(today) {
     }),
   ];
 
-  const tasks = [
+  const tasks: Task[] = [
     createTask({
       id: 'task_essay',
       subject: 'English',
@@ -57,7 +66,7 @@ export function buildSampleData(today) {
     Sun: 120,
   });
 
-  const bookedSlots = [
+  const bookedSlots: BookedSlot[] = [
     createBookedSlot({ weekday: 'Tue', label: 'Basketball practice', startTime: '16:00', endTime: '17:00' }),
     createBookedSlot({ weekday: 'Thu', label: 'Music lesson', startTime: '17:00', endTime: '17:45' }),
   ];

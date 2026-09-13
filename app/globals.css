@@ -1,6 +1,7 @@
-/* Student OS — hand-rolled CSS custom properties + vanilla layout.
-   Tokens and values below are copied verbatim from the design spec (§3–§12) —
-   do not substitute default framework styling anywhere a value is given. */
+/* Student OS — hand-rolled CSS custom properties (no Tailwind/component kit,
+   per the build brief). Tokens and values below are copied verbatim from the
+   design spec (§3–§12) — do not substitute default framework styling
+   anywhere a value is given. */
 
 :root {
   --bg: #F5F4EF;
@@ -25,15 +26,19 @@
   box-sizing: border-box;
 }
 
+html,
 body {
   margin: 0;
   background: var(--bg);
   color: var(--ink);
   font-family: var(--font-sans);
+}
+
+body {
   padding-inline: 18px;
 }
 
-#app {
+#app-shell {
   max-width: 640px;
   margin: 0 auto;
 }
@@ -66,6 +71,7 @@ select {
   text-transform: uppercase;
   color: var(--accent);
   margin: 0 0 8px;
+  min-height: 14px;
 }
 
 .app-title {
@@ -81,6 +87,7 @@ select {
   font-size: 14px;
   color: #C9C5B8;
   margin: 0;
+  min-height: 18px;
 }
 
 /* --- Tab nav (spec §10) --- */
@@ -115,7 +122,9 @@ select {
   padding: 9px 14px;
   border-radius: 9px;
   cursor: pointer;
-  transition: none;
+  text-decoration: none;
+  text-align: center;
+  display: inline-block;
 }
 
 .tab-btn:active {
@@ -132,6 +141,7 @@ select {
 .main-content {
   padding-top: 22px;
   padding-bottom: 40px;
+  animation: fade-rise-in 0.28s ease;
 }
 
 @keyframes fade-rise-in {
@@ -143,10 +153,6 @@ select {
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-.main-content.fade-in {
-  animation: fade-rise-in 0.28s ease;
 }
 
 /* --- Section titles + muted notes (spec §6, §12) --- */

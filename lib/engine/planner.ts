@@ -7,45 +7,72 @@
 // reschedule reasons have something to diff against (spec: "the day it was
 // assigned on the previous render").
 
-import { IMPORTANCE_WEIGHTS, DEFAULT_IMPORTANCE } from './model.js';
-import { addDays, weekdayOf, startOfWeekMonday, diffInDays, slotDurationMinutes } from './dateUtils.js';
-import { computeReasons } from './reasons.js';
+import { IMPORTANCE_WEIGHTS, DEFAULT_IMPORTANCE } from './model';
+import type { Exam, Task, Availability, BookedSlot, WorkItem, CompletionLogEntry } from './model';
+import { addDays, weekdayOf, startOfWeekMonday, diffInDays, slotDurationMinutes } from './dateUtils';
+import { computeReasons } from './reasons';
+import type { PlanDay, PlanBlock } from './reasons';
 
-function getLabel(item) {
-  return item.name ?? item.title ?? item.id;
+export interface CapacityDelta {
+  minutes: number;
+  status: 'ahead' | 'behind' | 'on-track';
+  label: string;
+  plannedMinutesSoFar: number;
+  budgetConsumedSoFar: number;
 }
 
-function allItems(exams, tasks) {
+export interface Plan {
+  today: string;
+  days: PlanDay[];
+  assignments: Record<string, string>;
+  capacityDelta: CapacityDelta;
+}
+
+export interface GeneratePlanInput {
+  exams?: Exam[];
+  tasks?: Task[];
+  availability: Availability;
+  bookedSlots?: BookedSlot[];
+  today: string;
+  completionLog?: CompletionLogEntry[];
+  previousPlan?: Plan | null;
+}
+
+function labelOf(item: WorkItem): string {
+  return item.type === 'topic' ? item.name : item.title;
+}
+
+function allItems(exams: Exam[], tasks: Task[]): WorkItem[] {
   return [...exams.flatMap((exam) => exam.topics), ...tasks];
 }
 
-function collectWorkItems(exams, tasks) {
+function collectWorkItems(exams: Exam[], tasks: Task[]): WorkItem[] {
   return allItems(exams, tasks).filter((item) => !item.completed && item.estimatedMinutes - item.minutesDone > 0);
 }
 
 // Urgency = importance weight ÷ days remaining (spec §2). Days remaining is
 // clamped to a minimum of 1 so due-today/overdue items don't divide by zero
 // or go negative — they simply rank as urgently as "due tomorrow" or higher.
-function computeUrgency(item, todayISO) {
+function computeUrgency(item: WorkItem, todayISO: string): number {
   const daysRemaining = Math.max(1, diffInDays(todayISO, item.dueDate));
   const weight = IMPORTANCE_WEIGHTS[item.importance] ?? IMPORTANCE_WEIGHTS[DEFAULT_IMPORTANCE];
   return weight / daysRemaining;
 }
 
-function rankByUrgency(items, todayISO) {
+function rankByUrgency(items: WorkItem[], todayISO: string): { item: WorkItem; urgency: number }[] {
   return items
     .map((item) => ({ item, urgency: computeUrgency(item, todayISO) }))
     .sort((a, b) => {
       if (b.urgency !== a.urgency) return b.urgency - a.urgency;
       if (a.item.dueDate !== b.item.dueDate) return a.item.dueDate < b.item.dueDate ? -1 : 1;
-      const la = getLabel(a.item);
-      const lb = getLabel(b.item);
+      const la = labelOf(a.item);
+      const lb = labelOf(b.item);
       if (la !== lb) return la < lb ? -1 : 1;
       return a.item.id < b.item.id ? -1 : 1;
     });
 }
 
-function dayBudgetMinutes(dateISO, availability, bookedSlots) {
+function dayBudgetMinutes(dateISO: string, availability: Availability, bookedSlots: BookedSlot[]): number {
   const weekday = weekdayOf(dateISO);
   const window = availability[weekday] ?? 0;
   const booked = bookedSlots
@@ -54,7 +81,7 @@ function dayBudgetMinutes(dateISO, availability, bookedSlots) {
   return Math.max(0, window - booked);
 }
 
-function dayLabelFor(index, dateISO) {
+function dayLabelFor(index: number, dateISO: string): string {
   if (index === 0) return 'Today';
   if (index === 1) return 'Tomorrow';
   return weekdayOf(dateISO);
@@ -68,7 +95,17 @@ function dayLabelFor(index, dateISO) {
 // "Budget consumed so far" = the sum of daily budgets from Monday through
 // today inclusive (today's whole-day budget counts once the day has arrived;
 // this engine has no time-of-day granularity).
-function computeCapacityDelta({ today, availability, bookedSlots, completionLog }) {
+function computeCapacityDelta({
+  today,
+  availability,
+  bookedSlots,
+  completionLog,
+}: {
+  today: string;
+  availability: Availability;
+  bookedSlots: BookedSlot[];
+  completionLog: CompletionLogEntry[];
+}): CapacityDelta {
   const weekStart = startOfWeekMonday(today);
   const elapsedDayCount = diffInDays(weekStart, today) + 1;
 
@@ -82,43 +119,44 @@ function computeCapacityDelta({ today, availability, bookedSlots, completionLog 
     .reduce((sum, entry) => sum + entry.minutes, 0);
 
   const minutes = plannedMinutesSoFar - budgetConsumedSoFar;
-  const status = minutes > 0 ? 'ahead' : minutes < 0 ? 'behind' : 'on-track';
+  const status: CapacityDelta['status'] = minutes > 0 ? 'ahead' : minutes < 0 ? 'behind' : 'on-track';
   const label =
-    status === 'ahead' ? `${minutes}m ahead of plan` : status === 'behind' ? `${Math.abs(minutes)}m behind plan` : 'On track';
+    status === 'ahead'
+      ? `${minutes}m ahead of plan`
+      : status === 'behind'
+        ? `${Math.abs(minutes)}m behind plan`
+        : 'On track';
 
   return { minutes, status, label, plannedMinutesSoFar, budgetConsumedSoFar };
 }
 
-/**
- * @param {object} args
- * @param {import('./model.js').Exam[]} args.exams
- * @param {import('./model.js').Task[]} args.tasks
- * @param {Record<string, number>} args.availability   weekday -> daily study minutes
- * @param {import('./model.js').BookedSlot[]} [args.bookedSlots]
- * @param {string} args.today                          'YYYY-MM-DD', the plan's day 0
- * @param {object[]} [args.completionLog]               entries from model.js's mark* mutators
- * @param {object|null} [args.previousPlan]             this same function's return value from the last render
- * @returns {{days: object[], assignments: Record<string,string>, capacityDelta: object}}
- */
-export function generatePlan({ exams = [], tasks = [], availability, bookedSlots = [], today, completionLog = [], previousPlan = null }) {
+export function generatePlan({
+  exams = [],
+  tasks = [],
+  availability,
+  bookedSlots = [],
+  today,
+  completionLog = [],
+  previousPlan = null,
+}: GeneratePlanInput): Plan {
   const workItems = collectWorkItems(exams, tasks);
   const ranked = rankByUrgency(workItems, today);
   const urgencyById = Object.fromEntries(ranked.map(({ item, urgency }) => [item.id, urgency]));
 
   // Per-render, ephemeral remaining-minutes bookkeeping — never written back
-  // onto the actual item (that only happens via the model.js mutators).
+  // onto the actual item (that only happens via the model.ts action helpers).
   const remaining = new Map(ranked.map(({ item }) => [item.id, item.estimatedMinutes - item.minutesDone]));
 
-  const days = [];
+  const days: PlanDay[] = [];
   for (let i = 0; i < 7; i++) {
     const date = addDays(today, i);
     const budgetMinutes = dayBudgetMinutes(date, availability, bookedSlots);
     let freeBudget = budgetMinutes;
-    const blocks = [];
+    const blocks: PlanBlock[] = [];
 
     for (const { item, urgency } of ranked) {
       if (freeBudget <= 0) break;
-      const left = remaining.get(item.id);
+      const left = remaining.get(item.id)!;
       if (left <= 0) continue;
       if (item.skipDates.includes(date)) continue;
 
@@ -127,7 +165,7 @@ export function generatePlan({ exams = [], tasks = [], availability, bookedSlots
         itemId: item.id,
         type: item.type,
         subject: item.subject,
-        label: getLabel(item),
+        label: labelOf(item),
         dueDate: item.dueDate,
         importance: item.importance,
         urgency,
@@ -151,7 +189,7 @@ export function generatePlan({ exams = [], tasks = [], availability, bookedSlots
 
   // Earliest date each item landed on, this render — this is what next
   // render's previousPlan.assignments will be diffed against.
-  const assignments = {};
+  const assignments: Record<string, string> = {};
   for (const day of days) {
     for (const block of day.blocks) {
       if (!(block.itemId in assignments)) assignments[block.itemId] = day.date;
