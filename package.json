@@ -1,0 +1,10 @@
+{
+  "name": "student-os",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Student OS — adaptive academic planner",
+  "scripts": {
+    "test:engine": "node engine/test/test-harness.js"
+  }
+}
