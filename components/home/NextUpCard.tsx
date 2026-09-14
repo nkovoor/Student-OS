@@ -3,7 +3,9 @@
 import { useState } from 'react';
 import { usePlan, useStudentOSData, useStudentOSActions } from '@/lib/state/StudentOSProvider';
 import { findWorkItem } from '@/lib/state/findWorkItem';
-import { xpForCompletion } from '@/lib/gamification';
+import { xpForCompletion, applyDailyXpCap, xpEarnedOnDate } from '@/lib/gamification';
+import { computeUrgency } from '@/lib/engine';
+import { todayISO } from '@/lib/format';
 import { ReasonText } from '@/components/ReasonText';
 
 const PARTIAL_STEP_MINUTES = 5;
@@ -36,7 +38,12 @@ export function NextUpCard() {
   }
 
   const remaining = item.estimatedMinutes - item.minutesDone;
-  const xpReward = xpForCompletion(remaining, item.estimatedMinutes);
+  const today = todayISO();
+  const rawXpReward = xpForCompletion(remaining, item.estimatedMinutes, computeUrgency(item, today));
+  // Preview the actual amount the daily cap would award, not the uncapped
+  // figure — otherwise this number could overstate what completing actually
+  // adds once today's cap has been reached.
+  const xpReward = applyDailyXpCap(rawXpReward, xpEarnedOnDate(data.xpLog, today));
 
   function startPartial() {
     setPartialMinutes(Math.min(remaining, DEFAULT_PARTIAL_MINUTES));

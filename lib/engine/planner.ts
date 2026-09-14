@@ -53,7 +53,10 @@ function collectWorkItems(exams: Exam[], tasks: Task[]): WorkItem[] {
 // Urgency = importance weight ÷ days remaining (spec §2). Days remaining is
 // clamped to a minimum of 1 so due-today/overdue items don't divide by zero
 // or go negative — they simply rank as urgently as "due tomorrow" or higher.
-function computeUrgency(item: WorkItem, todayISO: string): number {
+// Exported so lib/gamification.ts's urgency-weighted XP can reuse this exact
+// formula rather than re-deriving it — one urgency definition for the whole
+// app, not two that could drift apart.
+export function computeUrgency(item: WorkItem, todayISO: string): number {
   const daysRemaining = Math.max(1, diffInDays(todayISO, item.dueDate));
   const weight = IMPORTANCE_WEIGHTS[item.importance] ?? IMPORTANCE_WEIGHTS[DEFAULT_IMPORTANCE];
   return weight / daysRemaining;

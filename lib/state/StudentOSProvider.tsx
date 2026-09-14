@@ -27,10 +27,11 @@ import {
   withResetSkip,
   withEstimate,
   generatePlan,
+  computeUrgency,
 } from '@/lib/engine';
 import type { Exam, Task, Availability, BookedSlot, CompletionLogEntry, Weekday, WorkItem, Plan } from '@/lib/engine';
 import { todayISO } from '@/lib/format';
-import { xpForCompletion } from '@/lib/gamification';
+import { xpForCompletion, applyDailyXpCap, xpEarnedOnDate } from '@/lib/gamification';
 import type { XpLogEntry } from '@/lib/gamification';
 
 export const DEFAULT_TOPIC_ESTIMATE_MINUTES = 30;
@@ -46,9 +47,19 @@ interface StudentOSData {
   // Gamification (v2): lives in-memory alongside everything else for now —
   // there's no Supabase project connected yet, so there's no `profile` table
   // to add a total_xp column to. This moves into the database the same way
-  // exams/tasks will, once that work resumes.
+  // exams/tasks will, once that work resumes (see lib/gamification.ts's
+  // backend contract comment for the target shape).
   totalXp: number;
   xpLog: XpLogEntry[];
+  // Per-subject running XP (Profile screen's Subject Progress card, Part D).
+  // Incremented alongside totalXp in the same two reducer cases — one
+  // source of truth for "how much XP did this completion earn," just
+  // credited to both a lifetime total and a per-subject bucket.
+  subjectXp: Record<string, number>;
+  // Session-local only (see lib/gamification.ts's weekly-recap comment) —
+  // there's no persisted last_shown_recap_week yet, so "shown once" means
+  // once per session until that exists.
+  weeklyRecapDismissed: boolean;
 }
 
 interface State {
@@ -68,7 +79,8 @@ type Action =
   | { type: 'ADJUST_ESTIMATE'; item: WorkItem; deltaMinutes: number }
   | { type: 'SET_DAILY_MINUTES'; weekday: Weekday; minutes: number }
   | { type: 'ADD_SLOT'; weekday: Weekday; label: string; startTime: string; endTime: string }
-  | { type: 'DELETE_SLOT'; slotId: string };
+  | { type: 'DELETE_SLOT'; slotId: string }
+  | { type: 'DISMISS_WEEKLY_RECAP' };
 
 function replaceTopicInExams(exams: Exam[], topicId: string, next: Exam['topics'][number]): Exam[] {
   return exams.map((exam) =>
@@ -80,6 +92,32 @@ function replaceTopicInExams(exams: Exam[], topicId: string, next: Exam['topics'
 
 function replaceTaskInList(tasks: Task[], taskId: string, next: Task): Task[] {
   return tasks.map((t) => (t.id === taskId ? next : t));
+}
+
+// Shared by COMPLETE_ITEM and PARTIAL_ITEM — both award XP the same way:
+// urgency-weighted base (computeUrgency, same formula the scheduler itself
+// ranks work by) scaled by how much of the estimate this action just
+// covered, then the soft daily cap applied against what's already been
+// logged today, credited to both the lifetime total and the item's subject.
+function awardXp(
+  data: StudentOSData,
+  item: WorkItem,
+  minutesJustDone: number,
+  dateISO: string
+): Pick<StudentOSData, 'totalXp' | 'subjectXp' | 'xpLog'> {
+  const urgency = computeUrgency(item, dateISO);
+  const rawXp = xpForCompletion(minutesJustDone, item.estimatedMinutes, urgency);
+  const xpAlreadyToday = xpEarnedOnDate(data.xpLog, dateISO);
+  const xpAwarded = applyDailyXpCap(rawXp, xpAlreadyToday);
+
+  if (xpAwarded <= 0) {
+    return { totalXp: data.totalXp, subjectXp: data.subjectXp, xpLog: data.xpLog };
+  }
+  return {
+    totalXp: data.totalXp + xpAwarded,
+    subjectXp: { ...data.subjectXp, [item.subject]: (data.subjectXp[item.subject] ?? 0) + xpAwarded },
+    xpLog: [...data.xpLog, { date: dateISO, xp: xpAwarded }],
+  };
 }
 
 function applyAction(data: StudentOSData, action: Action): StudentOSData {
@@ -112,10 +150,8 @@ function applyAction(data: StudentOSData, action: Action): StudentOSData {
       const exams = item.type === 'topic' ? replaceTopicInExams(data.exams, item.id, item) : data.exams;
       const tasks = item.type === 'task' ? replaceTaskInList(data.tasks, item.id, item) : data.tasks;
       const completionLog = logEntry ? [...data.completionLog, logEntry] : data.completionLog;
-      const xpAwarded = logEntry ? xpForCompletion(logEntry.minutes, item.estimatedMinutes) : 0;
-      const totalXp = data.totalXp + xpAwarded;
-      const xpLog = xpAwarded > 0 ? [...data.xpLog, { date: dateISO, xp: xpAwarded }] : data.xpLog;
-      return { ...data, exams, tasks, completionLog, totalXp, xpLog };
+      const { totalXp, subjectXp, xpLog } = logEntry ? awardXp(data, item, logEntry.minutes, dateISO) : data;
+      return { ...data, exams, tasks, completionLog, totalXp, subjectXp, xpLog };
     }
 
     case 'PARTIAL_ITEM': {
@@ -124,10 +160,8 @@ function applyAction(data: StudentOSData, action: Action): StudentOSData {
       const exams = item.type === 'topic' ? replaceTopicInExams(data.exams, item.id, item) : data.exams;
       const tasks = item.type === 'task' ? replaceTaskInList(data.tasks, item.id, item) : data.tasks;
       const completionLog = logEntry ? [...data.completionLog, logEntry] : data.completionLog;
-      const xpAwarded = logEntry ? xpForCompletion(logEntry.minutes, item.estimatedMinutes) : 0;
-      const totalXp = data.totalXp + xpAwarded;
-      const xpLog = xpAwarded > 0 ? [...data.xpLog, { date: dateISO, xp: xpAwarded }] : data.xpLog;
-      return { ...data, exams, tasks, completionLog, totalXp, xpLog };
+      const { totalXp, subjectXp, xpLog } = logEntry ? awardXp(data, item, logEntry.minutes, dateISO) : data;
+      return { ...data, exams, tasks, completionLog, totalXp, subjectXp, xpLog };
     }
 
     case 'SKIP_ITEM_TODAY': {
@@ -172,6 +206,9 @@ function applyAction(data: StudentOSData, action: Action): StudentOSData {
     }
     case 'DELETE_SLOT':
       return { ...data, bookedSlots: data.bookedSlots.filter((slot) => slot.id !== action.slotId) };
+
+    case 'DISMISS_WEEKLY_RECAP':
+      return { ...data, weeklyRecapDismissed: true };
   }
 }
 
@@ -198,6 +235,8 @@ function initState(): State {
     completionLog: [],
     totalXp: 0,
     xpLog: [],
+    subjectXp: {},
+    weeklyRecapDismissed: false,
   };
   const plan = generatePlan({
     exams: data.exams,
@@ -259,6 +298,7 @@ export function useStudentOSActions() {
       addSlot: (input: { weekday: Weekday; label: string; startTime: string; endTime: string }) =>
         dispatch({ type: 'ADD_SLOT', ...input }),
       deleteSlot: (slotId: string) => dispatch({ type: 'DELETE_SLOT', slotId }),
+      dismissWeeklyRecap: () => dispatch({ type: 'DISMISS_WEEKLY_RECAP' }),
     }),
     [dispatch]
   );
