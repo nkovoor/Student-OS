@@ -1104,6 +1104,95 @@ select {
   margin-top: 7px;
 }
 
+/* --- Overall stat card (spec §11, §12): Progress tab only — the only card
+   with a left-stat/right-bar split, big display-font percentage left,
+   progress bar + workload caption right. --- */
+
+.overall-stat-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.overall-stat-percent {
+  font-family: var(--font-serif);
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1;
+  flex: 0 0 auto;
+}
+
+.overall-stat-bar-col {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.overall-stat-caption {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+/* --- Weekly trend chart (spec §11, §12): Progress tab only, Chart.js bar
+   chart — deliberately a different implementation from Home's day-strip
+   (§12's note above), which is plain CSS. --- */
+
+.trend-chart-wrap {
+  height: 160px;
+  margin-top: 4px;
+}
+
+/* --- Exam readiness (spec §11, §12): Progress tab only, no card wrapper —
+   each active exam is a labeled progress bar directly under the section
+   title, not a card. --- */
+
+.readiness-row {
+  margin-bottom: 18px;
+}
+
+.readiness-row:last-child {
+  margin-bottom: 0;
+}
+
+.readiness-row-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.readiness-row-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.readiness-row-subject {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.readiness-row-due {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.readiness-row-percent {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 700;
+  flex: 0 0 auto;
+}
+
 /* --- Responsive (spec §13) --- */
 
 @media (max-width: 420px) {
