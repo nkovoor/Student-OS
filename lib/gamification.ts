@@ -33,22 +33,37 @@ export function xpToLevel(totalXp: number): LevelProgress {
 // Urgency-weighted base XP (replaces the old flat 50 XP/completion): higher
 // urgency — lib/engine/planner.ts's computeUrgency, importance weight ÷
 // days-remaining, the SAME formula the scheduler ranks work by, not a
-// re-derived copy — earns more. Bounded rather than a raw multiply: urgency
-// ranges from near-zero (low importance, weeks out) to 3.0 (high importance,
-// due today), a ~100x span that would make far-off work feel worthless and
-// last-minute work feel like the only thing worth doing. Clamping the
-// *input* to [0.1, 3.0] before linearly mapping it onto a [20, 120] XP range
-// keeps the ratio to 6x — still a real, felt difference, but calibrated so a
-// genuinely middling completion (e.g. medium importance due in 2 days,
-// urgency 1.0) lands at ~51 XP — close to the old flat 50 — rather than the
-// whole economy jumping to a new scale the moment this ships.
-// FLAGGED: floor/ceiling/clamp bounds (20/120, 0.1-3.0) are a first-pass
-// calibration, not tuned against real usage yet — easy to retune, they're
-// the only four numbers below.
+// re-derived copy — earns more. Bounded rather than a raw multiply, since
+// urgency itself spans a ~100x range and an unclamped multiply would make
+// far-off work feel worthless and last-minute work feel like the only thing
+// worth doing.
+//
+// CLAMP_MIN/MAX are pinned to the engine's own real output, not guessed: run
+// against every (importance x days-remaining) combination a student would
+// realistically hit — 1/2/3/5/7/10/14/21/30 days out, all three importance
+// levels, 27 combinations total — urgency ranges exactly from 0.0333 (low
+// importance, 30 days out: weight 1 / 30 days) up to 3.0 (high importance,
+// due today/tomorrow: weight 3 / 1 day). CLAMP_MAX=3.0 needed no change —
+// it already matched the real ceiling exactly. CLAMP_MIN was 0.1 at first
+// (a guess), which sat ABOVE the real floor of 0.0333: every low-importance
+// item 10+ days out — a meaningful slice of realistic scenarios — was
+// clamping to the same value and losing exactly the differentiation this
+// whole system exists to provide. Now set to the exact computed floor
+// (1/30), not rounded to something tidier, so nothing realistic clamps away.
+//
+// FLOOR/CEILING (20/120 XP) were checked against that same 27-scenario
+// spread and left unchanged — 120 XP is reached only at the genuine max
+// (urgency 3.0), 20 XP is the genuine floor once CLAMP_MIN reflects reality,
+// and the "middling completion lands near the old flat 50" calibration goal
+// still holds after the clamp fix (urgency 1.0 -> 53 XP, was 51).
+//
+// FLAGGED: this is realistic-scenario simulation against the engine's own
+// output, not real usage data — there is none yet (no persistence, no live
+// students). Revisit once there is.
 const URGENCY_XP_FLOOR = 20;
 const URGENCY_XP_CEILING = 120;
-const URGENCY_CLAMP_MIN = 0.1;
-const URGENCY_CLAMP_MAX = 3.0;
+const URGENCY_CLAMP_MIN = 1 / 30; // exact real floor: low importance, 30 days out
+const URGENCY_CLAMP_MAX = 3.0; // exact real ceiling: high importance, due today — unchanged, already correct
 
 export function baseXpForUrgency(urgency: number): number {
   const clamped = Math.min(URGENCY_CLAMP_MAX, Math.max(URGENCY_CLAMP_MIN, urgency));
@@ -67,15 +82,38 @@ export function xpForCompletion(minutesJustDone: number, estimatedMinutes: numbe
   return Math.round(baseXpForUrgency(urgency) * fraction);
 }
 
-// Soft daily XP cap: discourages low-value task-grinding (splitting one
-// task into many tiny completions to rack up XP) without a harsh cliff. XP
-// earned today under DAILY_XP_CAP is awarded in full; XP that would push the
-// day over the cap is halved rather than zeroed, so crossing the cap still
-// feels like "less," not "nothing."
-// FLAGGED: 350 is a chosen midpoint of the suggested 300-400/day range —
-// not tuned against real usage yet, easy to retune (just this one constant,
-// or the 0.5 overflow factor below it).
-export const DAILY_XP_CAP = 350;
+// Soft daily XP cap: discourages low-value task-grinding without a harsh
+// cliff. XP earned today under DAILY_XP_CAP is awarded in full; XP that
+// would push the day over the cap is halved rather than zeroed, so crossing
+// it still feels like "less," not "nothing."
+//
+// 350 (a guessed midpoint of a suggested 300-400 range) turned out to be
+// too LOW once checked against a real simulated day: generatePlan() run
+// against a genuinely realistic "two exams within a few days" cram day —
+// two 2-topic exams, 240 realistic study minutes, all four 60-minute topics
+// completed — produced 378 raw XP (120+120+69+69, urgency-weighted), which
+// the old 350 cap would have clipped on a LEGITIMATE demanding day, exactly
+// what this mechanism is supposed to avoid. (Lighter days stayed far under
+// either cap: a 1-item light day = 20 XP, a 2-item normal day = 65 XP.)
+//
+// Set to 450 — ~19% headroom over that 378 XP heaviest-realistic-day figure,
+// confirmed by replaying that same day's four completions through the cap
+// sequentially (not just checking the sum): every block was awarded in
+// full, none reduced. One real tension surfaced by this same check, flagged
+// rather than resolved silently: at 450, the illustrative "20+ low-value
+// items" grinding case (20 items x ~21 XP each = 420 raw) no longer
+// triggers the cap at all — it takes ~22 same-profile items before any
+// reduction kicks in. Raising the cap to clear a genuine heavy day and
+// keeping it tight against grinding pull in opposite directions; 450
+// resolves that in favor of never punishing real studying, since urgency-
+// weighting itself already taxes low-value grinding (each such item only
+// earns ~20-21 XP versus up to 120 for genuinely urgent work) — but a
+// tighter cap (nearer 400) is the other reasonable answer if blocking
+// exactly "20+" is meant literally rather than illustratively.
+//
+// FLAGGED: realistic-scenario simulation, not real usage data — there is
+// none yet (no persistence, no live students). Revisit once there is.
+export const DAILY_XP_CAP = 450;
 const DAILY_XP_OVERFLOW_FACTOR = 0.5;
 
 export function applyDailyXpCap(rawXp: number, xpAlreadyEarnedToday: number): number {
