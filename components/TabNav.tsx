@@ -9,8 +9,8 @@ const TABS = [
   { href: '/home', label: 'Home' },
   { href: '/activities', label: 'Activities' },
   { href: '/scheduler', label: 'Scheduler' },
-  { href: '/progress', label: 'Progress' },
   { href: '/availability', label: 'Availability' },
+  { href: '/progress', label: 'Progress' },
 ] as const;
 
 export function TabNav() {
