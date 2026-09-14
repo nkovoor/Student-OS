@@ -29,7 +29,7 @@ import {
   generatePlan,
   computeUrgency,
 } from '@/lib/engine';
-import type { Exam, Task, Availability, BookedSlot, CompletionLogEntry, Weekday, WorkItem, Plan } from '@/lib/engine';
+import type { Exam, Task, Availability, BookedSlot, CompletionLogEntry, Importance, Weekday, WorkItem, Plan } from '@/lib/engine';
 import { todayISO } from '@/lib/format';
 import { xpForCompletion, applyDailyXpCap, xpEarnedOnDate } from '@/lib/gamification';
 import type { XpLogEntry } from '@/lib/gamification';
@@ -68,9 +68,9 @@ interface State {
 }
 
 type Action =
-  | { type: 'ADD_EXAM'; subject: string; examDate: string; topicNames: string[] }
+  | { type: 'ADD_EXAM'; subject: string; examDate: string; topicNames: string[]; importance: Importance }
   | { type: 'DELETE_EXAM'; examId: string }
-  | { type: 'ADD_TASK'; subject: string; title: string; dueDate: string; estimatedMinutes: number }
+  | { type: 'ADD_TASK'; subject: string; title: string; dueDate: string; estimatedMinutes: number; importance: Importance }
   | { type: 'DELETE_TASK'; taskId: string }
   | { type: 'COMPLETE_ITEM'; item: WorkItem }
   | { type: 'PARTIAL_ITEM'; item: WorkItem; minutesJustDone: number }
@@ -122,9 +122,15 @@ function awardXp(
 
 function applyAction(data: StudentOSData, action: Action): StudentOSData {
   switch (action.type) {
+    // importance now flows in from the form (ExamForm's new selector) rather
+    // than being silently omitted — it used to always fall through to
+    // createTopic()'s own `?? DEFAULT_IMPORTANCE` fallback regardless of
+    // what a student would have wanted, which meant computeUrgency() (and
+    // the urgency-weighted XP it drives) never saw anything but "medium" for
+    // any topic created through the real UI.
     case 'ADD_EXAM': {
       const topics = action.topicNames.map((name) =>
-        createTopic({ name, estimatedMinutes: DEFAULT_TOPIC_ESTIMATE_MINUTES })
+        createTopic({ name, estimatedMinutes: DEFAULT_TOPIC_ESTIMATE_MINUTES, importance: action.importance })
       );
       const exam = createExam({ subject: action.subject, examDate: action.examDate, topics });
       return { ...data, exams: [...data.exams, exam] };
@@ -138,6 +144,7 @@ function applyAction(data: StudentOSData, action: Action): StudentOSData {
         title: action.title,
         dueDate: action.dueDate,
         estimatedMinutes: action.estimatedMinutes,
+        importance: action.importance,
       });
       return { ...data, tasks: [...data.tasks, task] };
     }
@@ -283,10 +290,10 @@ export function useStudentOSActions() {
   const { dispatch } = useStudentOSContext();
   return useMemo(
     () => ({
-      addExam: (input: { subject: string; examDate: string; topicNames: string[] }) =>
+      addExam: (input: { subject: string; examDate: string; topicNames: string[]; importance: Importance }) =>
         dispatch({ type: 'ADD_EXAM', ...input }),
       deleteExam: (examId: string) => dispatch({ type: 'DELETE_EXAM', examId }),
-      addTask: (input: { subject: string; title: string; dueDate: string; estimatedMinutes: number }) =>
+      addTask: (input: { subject: string; title: string; dueDate: string; estimatedMinutes: number; importance: Importance }) =>
         dispatch({ type: 'ADD_TASK', ...input }),
       deleteTask: (taskId: string) => dispatch({ type: 'DELETE_TASK', taskId }),
       completeItem: (item: WorkItem) => dispatch({ type: 'COMPLETE_ITEM', item }),

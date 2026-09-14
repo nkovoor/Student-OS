@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { useStudentOSActions } from '@/lib/state/StudentOSProvider';
+import type { Importance } from '@/lib/engine';
 
 export function TaskForm() {
   const { addTask } = useStudentOSActions();
@@ -10,6 +11,11 @@ export function TaskForm() {
   const [title, setTitle] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [minutes, setMinutes] = useState('');
+  // Same gap, same fix as ExamForm's importance selector — tasks share the
+  // exact same createTask({ importance? }) shape and DEFAULT_IMPORTANCE
+  // fallback as exam topics, so defaulting to 'medium' here matches the
+  // previous silent behavior exactly.
+  const [importance, setImportance] = useState<Importance>('medium');
   const [error, setError] = useState<string | null>(null);
 
   function handleSubmit(event: FormEvent) {
@@ -22,11 +28,12 @@ export function TaskForm() {
     if (!estimatedMinutes || estimatedMinutes <= 0) return setError('Add an estimate in minutes.');
 
     setError(null);
-    addTask({ subject: subject.trim(), title: title.trim(), dueDate, estimatedMinutes });
+    addTask({ subject: subject.trim(), title: title.trim(), dueDate, estimatedMinutes, importance });
     setSubject('');
     setTitle('');
     setDueDate('');
     setMinutes('');
+    setImportance('medium');
   }
 
   return (
@@ -55,6 +62,16 @@ export function TaskForm() {
           value={dueDate}
           onChange={(e) => setDueDate(e.target.value)}
         />
+        <select
+          className="input"
+          aria-label="Task importance"
+          value={importance}
+          onChange={(e) => setImportance(e.target.value as Importance)}
+        >
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
         <input
           type="number"
           className="input input-minutes"

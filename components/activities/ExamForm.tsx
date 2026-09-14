@@ -3,12 +3,18 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { useStudentOSActions } from '@/lib/state/StudentOSProvider';
+import type { Importance } from '@/lib/engine';
 
 export function ExamForm() {
   const { addExam } = useStudentOSActions();
   const [subject, setSubject] = useState('');
   const [examDate, setExamDate] = useState('');
   const [topics, setTopics] = useState('');
+  // Defaults to 'medium', matching the previous silent fallback exactly —
+  // existing behavior doesn't change for anyone who doesn't touch this
+  // control, but it's now a visible, changeable choice instead of an
+  // invisible default (see StudentOSProvider's ADD_EXAM case).
+  const [importance, setImportance] = useState<Importance>('medium');
   const [error, setError] = useState<string | null>(null);
 
   function handleSubmit(event: FormEvent) {
@@ -23,10 +29,11 @@ export function ExamForm() {
     if (topicNames.length === 0) return setError('Add at least one topic to study.');
 
     setError(null);
-    addExam({ subject: subject.trim(), examDate, topicNames });
+    addExam({ subject: subject.trim(), examDate, topicNames, importance });
     setSubject('');
     setExamDate('');
     setTopics('');
+    setImportance('medium');
   }
 
   return (
@@ -47,6 +54,16 @@ export function ExamForm() {
           value={examDate}
           onChange={(e) => setExamDate(e.target.value)}
         />
+        <select
+          className="input"
+          aria-label="Exam importance"
+          value={importance}
+          onChange={(e) => setImportance(e.target.value as Importance)}
+        >
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
         <input
           type="text"
           className="input input-wide"
