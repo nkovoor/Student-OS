@@ -110,9 +110,13 @@
     radial-gradient(circle 500px at 15% 0%, rgba(76, 110, 245, 0.16), transparent),
     radial-gradient(circle 480px at 90% 40px, rgba(255, 122, 26, 0.1), transparent),
     var(--bg);
+  /* Opacity/spread raised from 0.3/0.16 + 55%/50% falloff (user-requested:
+     the original was nearly invisible against dark --bg, unlike light
+     theme's full-strength header gradient) so the blue/orange glow reads
+     clearly at the top of the page instead of disappearing into black. */
   --header-bg:
-    radial-gradient(circle at 15% -10%, rgba(76, 110, 245, 0.3), transparent 55%),
-    radial-gradient(circle at 90% 20%, rgba(255, 122, 26, 0.16), transparent 50%),
+    radial-gradient(circle at 15% -10%, rgba(76, 110, 245, 0.6), transparent 60%),
+    radial-gradient(circle at 90% 20%, rgba(255, 122, 26, 0.4), transparent 55%),
     var(--bg);
   --header-border-bottom: none;
   --header-subtitle-color: var(--muted);
