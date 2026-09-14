@@ -57,7 +57,19 @@ export function buildSampleData(today: string): SampleData {
   ];
 
   const availability = createAvailability({
-    Mon: 90,
+    // Monday is 120, not 90 like the other weekdays: at 90, the two highest-
+    // urgency items (essay 60m + forces' 30m-that-fits) already consume the
+    // whole day before Chemical bonding's turn comes up in the greedy
+    // allocator, so bonding never lands on Monday in render 1 at all — it
+    // starts Tuesday already. That makes the harness's "skip bonding for
+    // today" action a no-op (it was never on today to begin with), so its
+    // earliest day stays Tuesday in both renders and there's nothing for
+    // reasons.ts to report — not a bug in reasons.ts, a fixture that didn't
+    // exercise the delay-reason path it was meant to test. 120 (reusing the
+    // value already used for Sat/Sun below) leaves just enough room after
+    // essay+forces for bonding to get a real slice of Monday in render 1, so
+    // skipping it for today genuinely delays it to Tuesday.
+    Mon: 120,
     Tue: 90,
     Wed: 90,
     Thu: 90,
