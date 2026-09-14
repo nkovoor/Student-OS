@@ -667,6 +667,87 @@ select {
   flex: 0 0 auto;
 }
 
+/* --- Select (components/ui/Select.tsx): shadcn/ui's compound-component API
+   + Radix primitive (@radix-ui/react-select), restyled with this file's own
+   tokens instead of Tailwind — see that file's header comment for the
+   pattern this establishes. .select-trigger deliberately duplicates .input's
+   exact declarations rather than sharing the class, since Trigger renders a
+   <button> (needs cursor/flex/gap alongside the same border/radius/type
+   scale), not an <input>. The floating panel's shadow is its own standalone
+   value, not var(--shadow) — that token is "none" in dark theme (a flat-card
+   choice, see .card), and CSS silently drops an entire box-shadow list if
+   one entry in it is the bare "none" keyword; a dropdown menu needs to read
+   as floating above the page in both themes regardless of that card-only
+   convention, so it isn't reused here. --- */
+
+.select-trigger {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: 7px;
+  padding: 8px 10px;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.select-trigger[data-placeholder] {
+  color: var(--muted);
+}
+
+.select-trigger-icon {
+  display: inline-flex;
+  color: var(--muted);
+  flex: 0 0 auto;
+}
+
+.select-content {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+  z-index: 50;
+}
+
+.select-viewport {
+  padding: 4px;
+}
+
+.select-item {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--ink);
+  border-radius: 6px;
+  padding: 8px 10px 8px 28px;
+  position: relative;
+  cursor: pointer;
+  outline: none;
+  display: flex;
+  align-items: center;
+}
+
+.select-item[data-highlighted] {
+  background: var(--surface-2);
+}
+
+.select-item[data-disabled] {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.select-item-indicator {
+  position: absolute;
+  left: 8px;
+  display: inline-flex;
+  color: var(--accent-2);
+}
+
 .error-text {
   font-family: var(--font-sans);
   font-size: 12px;

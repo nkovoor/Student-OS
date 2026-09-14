@@ -5,6 +5,7 @@ import type { FormEvent } from 'react';
 import { WEEKDAYS, timeToMinutes } from '@/lib/engine';
 import type { Weekday } from '@/lib/engine';
 import { useStudentOSActions } from '@/lib/state/StudentOSProvider';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/Select';
 
 const WEEKDAY_FULL: Record<Weekday, string> = {
   Mon: 'Monday',
@@ -42,18 +43,18 @@ export function SlotForm() {
   return (
     <form className="add-form" noValidate onSubmit={handleSubmit}>
       <div className="add-form-row">
-        <select
-          className="input"
-          aria-label="Weekday"
-          value={weekday}
-          onChange={(e) => setWeekday(e.target.value as Weekday)}
-        >
-          {WEEKDAYS.map((day) => (
-            <option key={day} value={day}>
-              {WEEKDAY_FULL[day]}
-            </option>
-          ))}
-        </select>
+        <Select value={weekday} onValueChange={(value) => setWeekday(value as Weekday)}>
+          <SelectTrigger aria-label="Weekday">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {WEEKDAYS.map((day) => (
+              <SelectItem key={day} value={day}>
+                {WEEKDAY_FULL[day]}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <input
           type="text"
           className="input input-wide"
