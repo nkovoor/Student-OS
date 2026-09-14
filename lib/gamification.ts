@@ -61,9 +61,11 @@ export function thisWeekXp(xpLog: XpLogEntry[], today: string): number {
 // Consecutive days with at least one completed item, counting back from
 // today. If today has nothing logged yet, that alone doesn't break the
 // streak — the day isn't over — so counting starts from yesterday in that
-// case instead of zeroing out mid-day. A missed day (two or more days with
-// nothing) resets to zero: the simplest correct version per the brief; a
-// grace/freeze mechanic is explicitly left open for later.
+// case instead of zeroing out mid-day. A missed day resets to zero — this is
+// the confirmed final behavior for now, not a placeholder. Agreed next
+// iteration (not scheduled yet — once this ships and there's real usage data
+// to design against): a grace mechanic, one protected skip day per week that
+// doesn't reset the streak.
 export function computeStreak(completionLog: { date: string }[], today: string): number {
   const activeDates = new Set(completionLog.map((entry) => entry.date));
 

@@ -527,16 +527,18 @@ select {
   cursor: pointer;
 }
 
+/* Sizing stays Activities/Availability's own smaller scale (13px/10px16px) —
+   the hero's three buttons are intentionally larger/more "tappable-primary"
+   (14px/13px16px). Radius is 11px on both now: confirmed via computed-style
+   check that the hero's gradient renders correctly in both themes before
+   extending it here, so the two now share that one property along with the
+   fill itself (below) — see the shared .btn-gold, .btn-dark rule. */
 .btn-dark {
   font-size: 13px;
   padding: 10px 16px;
-  border-radius: 8px;
+  border-radius: 11px;
 }
 
-/* The hero's three buttons get the new mockup's exact sizing (14px/13px16px/
-   11px radius) — larger and more "tappable-primary" than Activities' form
-   button, which isn't being re-skinned until the later pass over the other
-   tabs (Part 6). */
 .btn-gold,
 .btn-ghost,
 .btn-ghost-muted {
@@ -554,10 +556,16 @@ select {
   transform: scale(0.97);
 }
 
-/* Primary action on the hero card — "Mark complete". The one place in the
-   app the blue-to-orange gradient treatment appears (Part 4: "use it ONLY
-   for the single highest-priority action per screen"). */
-.btn-gold {
+/* The hero's "Mark complete", plus Activities' "Add exam"/"Add task" and
+   Availability's "Book a permanent slot" (.btn-dark) — every primary action
+   button in the app, now sharing the same blue-to-orange gradient, radius,
+   and shadow. Originally Home-only ("use it ONLY for the single
+   highest-priority action per screen," Part 4) with the other tabs' primary
+   buttons on a solid --blue fill instead; extended here only after
+   confirming via getComputedStyle that the gradient renders the exact
+   spec'd 3-stop value in both themes, not a fallback. */
+.btn-gold,
+.btn-dark {
   background: var(--btn-gold-gradient);
   color: #FFFFFF;
   border: none;
@@ -579,20 +587,6 @@ select {
   background: transparent;
   color: var(--muted);
   border: 1px solid var(--border);
-}
-
-/* Primary action buttons on the non-Home tabs (Add exam/Add task/Book a
-   permanent slot) — solid --blue fill, per the accent-color audit. Was
-   var(--ink)/var(--surface) (a plain dark/light pair, inverting per theme
-   like the old v1.1 button), which is why blue never showed up anywhere on
-   Activities/Availability: Part 6 only extended the neutral surface/border
-   tokens to these tabs, not button accent colors. Text is a literal white,
-   not var(--surface) — var(--surface) is dark in dark theme (the old pairing
-   relied on that inversion), which would put dark text on a blue background. */
-.btn-dark {
-  background: var(--blue);
-  color: #FFFFFF;
-  border: none;
 }
 
 .mini-btn {
