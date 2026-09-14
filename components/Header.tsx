@@ -8,6 +8,7 @@ import { LevelBadge } from '@/components/gamification/LevelBadge';
 import { StreakIndicator } from '@/components/gamification/StreakIndicator';
 import { XPBar } from '@/components/gamification/XPBar';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { Avatar } from '@/components/Avatar';
 
 // Greeting is computed client-side only, same reasoning as before (spec
 // §10: "time-of-day-aware greeting" — SSR has no reliable notion of the
@@ -36,6 +37,7 @@ export function Header() {
           <div className="header-top-right">
             <StreakIndicator streak={streak} />
             <ThemeToggle />
+            <Avatar />
           </div>
         </div>
         <h1 className="app-title">Student OS</h1>

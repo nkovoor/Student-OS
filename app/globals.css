@@ -70,6 +70,17 @@
   --stat-row-bg: linear-gradient(90deg, #F0F2FC, #FFF3E9);
   --today-bar-bg: linear-gradient(180deg, var(--blue), var(--accent));
   --today-bar-glow: none;
+  /* Profile screen, Part C, verbatim. #1B2C8C/#FF7A1A are this gradient's own
+     stops, not elsewhere in the token set; #2E52D6/#5B3DBF mid-stops ARE
+     --blue/--indigo, referenced directly below rather than re-declared. */
+  --level-hero-bg:
+    radial-gradient(circle at 100% 0%, rgba(255, 122, 26, 0.55), transparent 45%),
+    repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.05) 0px, rgba(255, 255, 255, 0.05) 2px, transparent 2px, transparent 9px),
+    linear-gradient(135deg, #1B2C8C 0%, var(--blue) 40%, var(--indigo) 70%, var(--accent) 100%);
+  --level-hero-shadow: 0 14px 36px -10px rgba(46, 82, 214, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+  /* Profile screen, Part B item 2: light-theme identity avatar glow, rgba of
+     light --blue. */
+  --identity-avatar-glow: 0 0 22px rgba(46, 82, 214, 0.5);
 
   --font-serif: 'Space Grotesk', sans-serif;
   --font-sans: 'Inter', sans-serif;
@@ -124,6 +135,18 @@
   --stat-row-bg: linear-gradient(90deg, rgba(76, 110, 245, 0.16), rgba(255, 122, 26, 0.14));
   --today-bar-bg: linear-gradient(180deg, var(--blue), var(--accent));
   --today-bar-glow: 0 0 10px rgba(255, 122, 26, 0.35);
+  /* Profile screen, Part C, verbatim. #14205C/#2A3A9C/#4A2E5C are custom
+     deep-tone stops for this card specifically — deliberately darker/moodier
+     than the standard dark-theme --blue/--indigo tokens, per the spec, so
+     white text stays readable at full opacity. */
+  --level-hero-bg:
+    radial-gradient(circle at 100% 0%, rgba(255, 122, 26, 0.55), transparent 45%),
+    repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.04) 0px, rgba(255, 255, 255, 0.04) 2px, transparent 2px, transparent 9px),
+    linear-gradient(135deg, #14205C 0%, #2A3A9C 40%, #4A2E5C 70%, var(--accent) 100%);
+  --level-hero-shadow: 0 14px 36px -10px rgba(76, 110, 245, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1) inset, 0 0 30px rgba(76, 110, 245, 0.15);
+  /* Profile screen, Part B item 2: dark-theme identity avatar glow, rgba of
+     dark --blue, per "shadow color adjusted to dark theme's --blue". */
+  --identity-avatar-glow: 0 0 22px rgba(76, 110, 245, 0.5);
 
   --shadow: none;
 }
@@ -254,6 +277,34 @@ select {
 }
 
 .theme-toggle-btn:active {
+  transform: scale(0.94);
+}
+
+/* --- Avatar (Profile screen, Part A): global header entry point, present
+   on all 5 tabs since Header itself already is. One fixed treatment across
+   both themes per the exact spec given (unlike .theme-toggle-btn above,
+   which does invert per theme) — the header's own gradient background
+   already provides enough contrast for translucent white in both themes. --- */
+
+.avatar-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
+  color: #FFFFFF;
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 13px;
+  text-decoration: none;
+  flex: 0 0 auto;
+  cursor: pointer;
+}
+
+.avatar-chip:active {
   transform: scale(0.94);
 }
 
@@ -855,6 +906,24 @@ select {
   margin-bottom: 10px;
 }
 
+/* --- Weekly recap banner (Part F.4): plain dismissible .card, no new card
+   style — just its own close button. --- */
+
+.recap-dismiss-btn {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 18px;
+  line-height: 1;
+  padding: 0 2px;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.recap-dismiss-btn:active {
+  transform: scale(0.94);
+}
+
 /* --- Capacity read (spec §11, §12): ahead/on-track in --muted, behind in
    --danger — text only, never a filled badge. Shared by Home and (later)
    Progress. --- */
@@ -1278,6 +1347,466 @@ select {
   font-size: 14px;
   font-weight: 700;
   flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* --- Exam readiness milestones (Part F.3) --- */
+
+.readiness-row.is-milestone-50 .progress-fill {
+  box-shadow: 0 0 6px rgba(255, 122, 26, 0.45);
+}
+
+.readiness-row.is-milestone-100 .progress-fill {
+  box-shadow: 0 0 10px rgba(255, 122, 26, 0.7);
+}
+
+.readiness-milestone-badge {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent-2);
+  margin-left: 6px;
+}
+
+/* --- Profile screen (new global entry point via the avatar, Part B) --- */
+
+.profile-back-link {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+  text-decoration: none;
+  margin-bottom: 18px;
+}
+
+.identity-block {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.identity-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  background: linear-gradient(135deg, var(--blue), var(--indigo));
+  box-shadow: var(--identity-avatar-glow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 22px;
+}
+
+.identity-text {
+  min-width: 0;
+}
+
+.identity-name {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 19px;
+  margin: 0 0 2px;
+}
+
+.identity-email {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0;
+}
+
+.identity-mock-flag {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-style: italic;
+  color: var(--muted);
+  margin: 4px 0 0;
+}
+
+/* --- Level Hero Card (Part C): the one component on this screen with a
+   distinct, richer treatment — everything else uses .card/.card-accent-top.
+   Do not apply this card's texture/bracket/segmented-bar treatment to any
+   other card on this screen or elsewhere in the app. --- */
+
+.level-hero-card {
+  border-radius: 18px;
+  padding: 22px;
+  position: relative;
+  overflow: hidden;
+  color: #fff;
+  background: var(--level-hero-bg);
+  box-shadow: var(--level-hero-shadow);
+  margin-bottom: 16px;
+}
+
+.level-hero-card::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 20px;
+  height: 20px;
+  border-top: 2px solid rgba(255, 255, 255, 0.55);
+  border-left: 2px solid rgba(255, 255, 255, 0.55);
+  border-radius: 4px 0 0 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.level-hero-card::after {
+  content: '';
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  width: 20px;
+  height: 20px;
+  /* rgba(255,122,26) is --accent's orange, spelled out directly — same
+     reasoning as .day-card.is-today's ring: CSS can't pull RGB channels out
+     of a hex custom property for use inside rgba(). --accent doesn't change
+     across themes, so one value covers both. */
+  border-bottom: 2px solid rgba(255, 122, 26, 0.7);
+  border-right: 2px solid rgba(255, 122, 26, 0.7);
+  border-radius: 0 0 4px 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.level-hero-top-row {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.level-hero-level-group {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.level-hero-level-num {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 38px;
+  line-height: 1;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+}
+
+.level-hero-level-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.75;
+}
+
+.level-hero-title-badge {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 12px;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 99px;
+  padding: 6px 13px;
+  text-transform: uppercase;
+  box-shadow: 0 0 14px rgba(255, 255, 255, 0.12);
+  white-space: nowrap;
+}
+
+.xp-seg-row {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  gap: 4px;
+}
+
+.xp-seg {
+  flex: 1;
+  height: 18px;
+  border-radius: 3px;
+}
+
+.xp-seg.empty {
+  background: rgba(0, 0, 0, 0.28);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+.xp-seg.filled {
+  background:
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.18) 0px, rgba(255, 255, 255, 0.18) 3px, transparent 3px, transparent 7px),
+    linear-gradient(180deg, #FFC46B 0%, #FF7A1A 100%);
+  box-shadow: 0 0 10px rgba(255, 122, 26, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.4), inset 0 -2px 3px rgba(0, 0, 0, 0.15);
+}
+
+@keyframes xpPulse {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(255, 122, 26, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.4), inset 0 -2px 3px rgba(0, 0, 0, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 122, 26, 0.95), inset 0 1px 1px rgba(255, 255, 255, 0.55), inset 0 -2px 3px rgba(0, 0, 0, 0.15);
+  }
+}
+
+/* No prior prefers-reduced-motion handling exists anywhere else in this
+   codebase to match (the app's only other animation, .main-content's
+   fade-rise-in entrance, has no such guard) — this is a new, standard
+   implementation for this specific animation: motion only when the visitor
+   hasn't asked to reduce it, a static "peak glow" (the keyframe's 50% state)
+   standing in for it otherwise, so the leading segment still reads as the
+   current progress edge without motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .xp-seg.filled.leading {
+    animation: xpPulse 1.7s ease-in-out infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .xp-seg.filled.leading {
+    box-shadow: 0 0 20px rgba(255, 122, 26, 0.95), inset 0 1px 1px rgba(255, 255, 255, 0.55), inset 0 -2px 3px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.xp-seg-note {
+  position: relative;
+  z-index: 2;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  opacity: 0.6;
+  margin: 6px 0 0;
+}
+
+.level-hero-xp-row {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 12px;
+  margin-top: 10px;
+}
+
+.level-hero-xp-current {
+  color: #FFC46B;
+  text-shadow: 0 0 8px rgba(255, 122, 26, 0.5);
+}
+
+.level-hero-xp-next {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* --- Standard card accent-top variant (Part E): every card on this screen
+   except the Level Hero Card uses .card unchanged, plus this modifier for
+   the 2px accent top border. Scoped as an addition, not a change to .card
+   itself — Home/Progress's existing cards must not pick this up. --- */
+
+.card-accent-top {
+  border-top: 2px solid var(--blue);
+}
+
+.card-accent-top.is-accent {
+  border-top-color: var(--accent);
+}
+
+/* --- Archetype Ladder card --- */
+
+.ladder-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  border-top: 1px solid var(--border);
+}
+
+/* Not :first-child — .card-title (an <h3>) is always the actual first
+   child of the card; this targets "the row immediately after the title"
+   instead, which is the row that actually needs its divider suppressed. */
+.card-title + .ladder-row {
+  border-top: none;
+  padding-top: 0;
+}
+
+.ladder-tier {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+  flex: 0 0 52px;
+}
+
+.ladder-title {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  flex: 1 1 auto;
+}
+
+.ladder-row.is-locked .ladder-title {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.ladder-status {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  flex: 0 0 auto;
+}
+
+.ladder-row.is-current .ladder-status {
+  color: var(--accent-2);
+}
+
+.ladder-row.is-passed .ladder-status {
+  color: var(--muted);
+}
+
+.ladder-row.is-locked .ladder-status {
+  color: var(--muted);
+  opacity: 0.6;
+}
+
+/* --- Stats chip row --- */
+
+.stats-chip-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.stats-chip {
+  flex: 1 1 0;
+  min-width: 0;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  border-bottom: 2px solid var(--blue);
+  padding: 12px 10px;
+  text-align: center;
+}
+
+.stats-chip-2 {
+  border-bottom-color: var(--accent);
+}
+
+.stats-chip-3 {
+  border-bottom-color: var(--indigo);
+}
+
+.stats-chip-value {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 17px;
+  display: block;
+}
+
+.stats-chip-label {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  color: var(--muted);
+  display: block;
+  margin-top: 2px;
+}
+
+/* --- Subject Progress card (Part D) --- */
+
+.subject-progress-row {
+  padding: 8px 0;
+}
+
+.card-title + .subject-progress-row {
+  padding-top: 0;
+}
+
+.subject-progress-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.subject-progress-name {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.subject-progress-level {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.subject-progress-track {
+  height: 6px;
+  border-radius: 99px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.subject-progress-fill {
+  height: 100%;
+  border-radius: 99px;
+}
+
+/* --- Settings card --- */
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-top: 1px solid var(--border);
+}
+
+.card-title + .settings-row {
+  border-top: none;
+  padding-top: 0;
+}
+
+.settings-row-label {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.settings-row-value {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.settings-row.is-danger .settings-row-label {
+  color: var(--danger);
+}
+
+/* Modifier for settings rows that are real <button>s (Theme, Sign out)
+   rather than a plain div (Notifications) — always combined with
+   .settings-row on the same element, which supplies the border-top divider,
+   so this resets only the OTHER three border sides (a native <button>'s
+   user-agent stylesheet sets its own on all four) rather than the `border`
+   shorthand, which would zero out border-top too and silently kill the
+   divider depending on cascade order between the two classes. font/color
+   are already handled by the app-wide `button { font: inherit; color:
+   inherit; }` reset near the top of this file, so they're not repeated
+   here either — that would have the same problem versus .settings-row-
+   label's own font-size/weight. */
+.settings-row-btn {
+  width: 100%;
+  background: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  cursor: pointer;
+  text-align: left;
 }
 
 /* --- Responsive (spec §13) --- */

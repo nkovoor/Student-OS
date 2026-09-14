@@ -33,6 +33,21 @@ export function subjectColor(subject: string, theme: Theme): string {
   return SUBJECT_COLORS[theme][subject] || SUBJECT_FALLBACK[theme];
 }
 
+// Profile screen's per-subject progress bars (Part D) want each subject's
+// own color gradating "into its own lighter variant" — there's no existing
+// token for that (only Maths/Social Science alias --blue-2/--indigo, and
+// only in one direction; Science and English have no lighter-variant token
+// at all), so this computes one from any subject's hex directly rather than
+// inventing 4 more one-off tokens. amount is 0..1 toward white.
+export function lightenHex(hex: string, amount: number): string {
+  const num = parseInt(hex.slice(1), 16);
+  const r = (num >> 16) & 0xff;
+  const g = (num >> 8) & 0xff;
+  const b = num & 0xff;
+  const lighten = (channel: number) => Math.round(channel + (255 - channel) * amount);
+  return `#${[lighten(r), lighten(g), lighten(b)].map((c) => c.toString(16).padStart(2, '0')).join('')}`;
+}
+
 export function todayISO(): string {
   return toISODate(new Date());
 }
