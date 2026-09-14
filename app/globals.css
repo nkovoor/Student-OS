@@ -298,9 +298,13 @@ select {
   transform: scale(0.97);
 }
 
+/* Was var(--ink)/var(--surface) (v1.1's neutral ink pill, never updated for
+   v2) — the tab nav sits on every single screen, so this is the single
+   highest-visibility place to carry --blue through the whole app, not just
+   Home. Literal white text for the same reason as .btn-dark above. */
 .tab-btn.is-active {
-  background: var(--ink);
-  color: var(--surface);
+  background: var(--blue);
+  color: #FFFFFF;
 }
 
 /* --- Main content + entrance animation (spec §9) --- */
@@ -577,9 +581,17 @@ select {
   border: 1px solid var(--border);
 }
 
+/* Primary action buttons on the non-Home tabs (Add exam/Add task/Book a
+   permanent slot) — solid --blue fill, per the accent-color audit. Was
+   var(--ink)/var(--surface) (a plain dark/light pair, inverting per theme
+   like the old v1.1 button), which is why blue never showed up anywhere on
+   Activities/Availability: Part 6 only extended the neutral surface/border
+   tokens to these tabs, not button accent colors. Text is a literal white,
+   not var(--surface) — var(--surface) is dark in dark theme (the old pairing
+   relied on that inversion), which would put dark text on a blue background. */
 .btn-dark {
-  background: var(--ink);
-  color: var(--surface);
+  background: var(--blue);
+  color: #FFFFFF;
   border: none;
 }
 
